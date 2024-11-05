@@ -10,10 +10,7 @@ use bevy::{
 
 use crate::{
     asset_tracking::LoadResource,
-    demo::{
-        animation::PlayerAnimation,
-        movement::{MovementController, ScreenWrap},
-    },
+    demo::movement::{MovementController, ScreenWrap},
     screens::Screen,
     AppSet,
 };
@@ -57,9 +54,8 @@ fn spawn_player(
     // can specify which section of the image we want to see. We will use this
     // to animate our player character. You can learn more about texture atlases in
     // this example: https://github.com/bevyengine/bevy/blob/latest/examples/2d/texture_atlas.rs
-    let layout = TextureAtlasLayout::from_grid(UVec2::splat(32), 6, 2, Some(UVec2::splat(1)), None);
-    let texture_atlas_layout = texture_atlas_layouts.add(layout);
-    let player_animation = PlayerAnimation::new();
+    let layout = TextureAtlasLayout::from_grid(UVec2::splat(64), 1, 1, Some(UVec2::splat(1)), None);
+    let texture_atlas_layout: Handle<TextureAtlasLayout> = texture_atlas_layouts.add(layout);
 
     commands.spawn((
         Name::new("Player"),
@@ -71,14 +67,13 @@ fn spawn_player(
         },
         TextureAtlas {
             layout: texture_atlas_layout.clone(),
-            index: player_animation.get_atlas_index(),
+            index: 0,
         },
         MovementController {
             max_speed: config.max_speed,
             ..default()
         },
         ScreenWrap,
-        player_animation,
         StateScoped(Screen::Gameplay),
     ));
 }
@@ -119,16 +114,10 @@ pub struct PlayerAssets {
     // This means that it will not finish loading until the labeled asset is also loaded.
     #[dependency]
     pub ducky: Handle<Image>,
-    #[dependency]
-    pub steps: Vec<Handle<AudioSource>>,
 }
 
 impl PlayerAssets {
-    pub const PATH_DUCKY: &'static str = "images/ducky.png";
-    pub const PATH_STEP_1: &'static str = "audio/sound_effects/step1.ogg";
-    pub const PATH_STEP_2: &'static str = "audio/sound_effects/step2.ogg";
-    pub const PATH_STEP_3: &'static str = "audio/sound_effects/step3.ogg";
-    pub const PATH_STEP_4: &'static str = "audio/sound_effects/step4.ogg";
+    pub const PATH_DUCKY: &'static str = "images/blue_arrow_cursor.png";
 }
 
 impl FromWorld for PlayerAssets {
@@ -142,12 +131,6 @@ impl FromWorld for PlayerAssets {
                     settings.sampler = ImageSampler::nearest();
                 },
             ),
-            steps: vec![
-                assets.load(PlayerAssets::PATH_STEP_1),
-                assets.load(PlayerAssets::PATH_STEP_2),
-                assets.load(PlayerAssets::PATH_STEP_3),
-                assets.load(PlayerAssets::PATH_STEP_4),
-            ],
         }
     }
 }

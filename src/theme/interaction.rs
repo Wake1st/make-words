@@ -62,21 +62,17 @@ fn apply_interaction_palette(
 #[derive(Resource, Asset, Reflect, Clone)]
 pub struct InteractionAssets {
     #[dependency]
-    hover: Handle<AudioSource>,
-    #[dependency]
     press: Handle<AudioSource>,
 }
 
 impl InteractionAssets {
-    pub const PATH_BUTTON_HOVER: &'static str = "audio/sound_effects/button_hover.ogg";
-    pub const PATH_BUTTON_PRESS: &'static str = "audio/sound_effects/button_press.ogg";
+    pub const PATH_BUTTON_PRESS: &'static str = "audio/sound_effects/mouse_click.ogg";
 }
 
 impl FromWorld for InteractionAssets {
     fn from_world(world: &mut World) -> Self {
         let assets = world.resource::<AssetServer>();
         Self {
-            hover: assets.load(Self::PATH_BUTTON_HOVER),
             press: assets.load(Self::PATH_BUTTON_PRESS),
         }
     }
@@ -89,7 +85,6 @@ fn trigger_interaction_sound_effect(
 ) {
     for interaction in &interaction_query {
         let source = match interaction {
-            Interaction::Hovered => interaction_assets.hover.clone(),
             Interaction::Pressed => interaction_assets.press.clone(),
             _ => continue,
         };
