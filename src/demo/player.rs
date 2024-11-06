@@ -6,24 +6,19 @@ use bevy::{
     ecs::{system::RunSystemOnce as _, world::Command},
     prelude::*,
     render::texture::{ImageLoaderSettings, ImageSampler},
+    window::PrimaryWindow,
 };
 
-use crate::{
-    asset_tracking::LoadResource,
-    demo::movement::{MovementController, ScreenWrap},
-    screens::Screen,
-    AppSet,
-};
+use crate::{asset_tracking::LoadResource, demo::movement::ScreenWrap, screens::Screen, AppSet};
+
+const CURSOR_OFFSET: Vec2 = Vec2::new(318.0, 62.0);
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<Player>();
     app.load_resource::<PlayerAssets>();
 
     // Record directional input as movement controls.
-    app.add_systems(
-        Update,
-        record_player_directional_input.in_set(AppSet::RecordInput),
-    );
+    app.add_systems(Update, cursor_position.in_set(AppSet::RecordInput));
 }
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Default, Reflect)]
@@ -32,10 +27,7 @@ pub struct Player;
 
 /// A command to spawn the player character.
 #[derive(Debug)]
-pub struct SpawnPlayer {
-    /// See [`MovementController::max_speed`].
-    pub max_speed: f32,
-}
+pub struct SpawnPlayer {}
 
 impl Command for SpawnPlayer {
     fn apply(self, world: &mut World) {
@@ -44,7 +36,7 @@ impl Command for SpawnPlayer {
 }
 
 fn spawn_player(
-    In(config): In<SpawnPlayer>,
+    In(_config): In<SpawnPlayer>,
     mut commands: Commands,
     player_assets: Res<PlayerAssets>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
@@ -62,49 +54,32 @@ fn spawn_player(
         Player,
         SpriteBundle {
             texture: player_assets.ducky.clone(),
-            transform: Transform::from_scale(Vec2::splat(8.0).extend(1.0)),
+            transform: Transform::from_scale(Vec2::splat(2.0).extend(1.0)),
             ..Default::default()
         },
         TextureAtlas {
             layout: texture_atlas_layout.clone(),
             index: 0,
         },
-        MovementController {
-            max_speed: config.max_speed,
-            ..default()
-        },
         ScreenWrap,
         StateScoped(Screen::Gameplay),
     ));
 }
 
-fn record_player_directional_input(
-    input: Res<ButtonInput<KeyCode>>,
-    mut controller_query: Query<&mut MovementController, With<Player>>,
+fn cursor_position(
+    q_windows: Query<&Window, With<PrimaryWindow>>,
+    mut transform_query: Query<&mut Transform, With<Player>>,
 ) {
-    // Collect directional input.
-    let mut intent = Vec2::ZERO;
-    if input.pressed(KeyCode::KeyW) || input.pressed(KeyCode::ArrowUp) {
-        intent.y += 1.0;
-    }
-    if input.pressed(KeyCode::KeyS) || input.pressed(KeyCode::ArrowDown) {
-        intent.y -= 1.0;
-    }
-    if input.pressed(KeyCode::KeyA) || input.pressed(KeyCode::ArrowLeft) {
-        intent.x -= 1.0;
-    }
-    if input.pressed(KeyCode::KeyD) || input.pressed(KeyCode::ArrowRight) {
-        intent.x += 1.0;
-    }
+    let window = q_windows.single();
+    let window_half_size = Vec2::new(window.width(), window.height()) / 2.0;
 
-    // Normalize so that diagonal movement has the same speed as
-    // horizontal and vertical movement.
-    // This should be omitted if the input comes from an analog stick instead.
-    let intent = intent.normalize_or_zero();
-
-    // Apply movement intent to controllers.
-    for mut controller in &mut controller_query {
-        controller.intent = intent;
+    // Games typically only have one window (the primary window)
+    if let Some(position) = window.cursor_position() {
+        for mut transform in &mut transform_query {
+            transform.translation = (window_half_size
+                + Vec2::new(position.x + CURSOR_OFFSET.x, -position.y - CURSOR_OFFSET.y))
+            .extend(0.0);
+        }
     }
 }
 
