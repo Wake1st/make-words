@@ -1,7 +1,10 @@
 use bevy::{input::common_conditions::input_just_pressed, prelude::*};
 
 use crate::{
-    demo::{dnd::drag::Draggable, movement::ScreenWrap},
+    demo::{
+        dnd::{drag::Draggable, drop::DropZone},
+        movement::ScreenWrap,
+    },
     screens::Screen,
     AppSet,
 };
@@ -83,6 +86,10 @@ fn spawn_letter(
         },
         Draggable {
             size: Vec2::splat(256.0),
+        },
+        DropZone {
+            size: Vec2::splat(256.0),
+            ..default()
         },
         ScreenWrap,
         StateScoped(Screen::Gameplay),
