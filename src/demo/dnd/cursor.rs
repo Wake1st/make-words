@@ -1,4 +1,4 @@
-use bevy::{prelude::*, window::PrimaryWindow};
+use bevy::prelude::*;
 
 use crate::AppSet;
 
@@ -12,14 +12,17 @@ pub(super) fn plugin(app: &mut App) {
 pub struct CursorPosition(pub Vec2);
 
 pub fn store_cursor_position(
-    q_windows: Query<&Window, With<PrimaryWindow>>,
+    camera: Query<(&Camera, &GlobalTransform)>,
+    windows: Query<&Window>,
     mut cursor_position: ResMut<CursorPosition>,
 ) {
-    let window = q_windows.single();
-
-    // Games typically only have one window (the primary window)
-    if let Some(position) = window.cursor_position() {
-        //  move the "cursor" image
-        cursor_position.0 = position;
+    let (camera, camera_transform) = camera.single();
+    if let Some(pos) = windows
+        .single()
+        .cursor_position()
+        .and_then(|cursor| camera.viewport_to_world(camera_transform, cursor))
+        .map(|ray| ray.origin.truncate())
+    {
+        cursor_position.0 = pos;
     }
 }
