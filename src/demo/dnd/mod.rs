@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-mod cursor;
+pub mod cursor;
 pub mod drag;
 pub mod drop;
 

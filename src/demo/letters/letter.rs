@@ -2,7 +2,7 @@ use bevy::{input::common_conditions::input_just_pressed, prelude::*};
 
 use crate::{
     demo::{
-        dnd::{drag::Draggable, drop::DropZone},
+        dnd::{cursor::CursorPosition, drag::Draggable, drop::DropZone},
         movement::ScreenWrap,
     },
     screens::Screen,
@@ -13,9 +13,14 @@ pub(super) fn plugin(app: &mut App) {
     app.add_systems(Startup, load_letters);
     app.add_systems(
         Update,
-        spawn_letter
-            .in_set(AppSet::Update)
-            .run_if(input_just_pressed(MouseButton::Right)),
+        (
+            spawn_on_input
+                .in_set(AppSet::Update)
+                .run_if(input_just_pressed(KeyCode::KeyQ)),
+            spawn_on_input
+                .in_set(AppSet::Update)
+                .run_if(input_just_pressed(KeyCode::KeyW)),
+        ),
     );
 }
 
@@ -23,7 +28,7 @@ pub(super) fn plugin(app: &mut App) {
 pub struct Letter {
     pub value: String,
     pub prefixes: Vec<String>,
-    pub postfixes: Vec<String>,
+    pub suffixes: Vec<String>,
 }
 
 impl Default for Letter {
@@ -31,7 +36,7 @@ impl Default for Letter {
         Self {
             value: Default::default(),
             prefixes: Default::default(),
-            postfixes: Default::default(),
+            suffixes: Default::default(),
         }
     }
 }
@@ -41,7 +46,7 @@ impl Clone for Letter {
         Self {
             value: self.value.clone(),
             prefixes: self.prefixes.clone(),
-            postfixes: self.postfixes.clone(),
+            suffixes: self.suffixes.clone(),
         }
     }
 }
@@ -53,35 +58,66 @@ pub struct LetterList {
 
 fn load_letters(mut commands: Commands) {
     commands.insert_resource(LetterList {
-        letters: vec![Letter {
-            value: "b".into(),
-            prefixes: vec![
-                "m".into(),
-                "a".into(),
-                "e".into(),
-                "i".into(),
-                "o".into(),
-                "u".into(),
-            ],
-            postfixes: vec!["a".into(), "e".into(), "i".into(), "o".into(), "u".into()],
-        }],
+        letters: vec![
+            Letter {
+                value: "b".into(),
+                prefixes: vec!["".into()],
+                suffixes: vec!["o".into()],
+            },
+            Letter {
+                value: "o".into(),
+                prefixes: vec!["b".into()],
+                suffixes: vec!["o".into()],
+            },
+        ],
     });
 }
 
-fn spawn_letter(
+fn spawn_on_input(
+    input: Res<ButtonInput<KeyCode>>,
     asset_server: Res<AssetServer>,
     letter_list: Res<LetterList>,
+    cursor_position: Res<CursorPosition>,
     mut commands: Commands,
 ) {
-    let letter = letter_list.letters[0].clone();
-    let texture = asset_server.load("images/b.png");
+    if input.just_pressed(KeyCode::KeyQ) {
+        let letter = letter_list.letters[0].clone();
+        let texture = asset_server.load("images/b.png");
+        spawn_letter(
+            letter,
+            texture,
+            cursor_position.0.extend(0.0),
+            &mut commands,
+        );
+    }
+
+    if input.just_pressed(KeyCode::KeyW) {
+        let letter = letter_list.letters[1].clone();
+        let texture = asset_server.load("images/o.png");
+        spawn_letter(
+            letter,
+            texture,
+            cursor_position.0.extend(0.0),
+            &mut commands,
+        );
+    }
+}
+
+fn spawn_letter(
+    letter: Letter,
+    texture: Handle<Image>,
+    cursor_position: Vec3,
+    commands: &mut Commands,
+) {
+    let mut position = Transform::from_scale(Vec2::splat(2.0).extend(0.0));
+    position.translation += cursor_position;
 
     commands.spawn((
         Name::new("Letter"),
         letter,
         SpriteBundle {
             texture: texture.clone(),
-            transform: Transform::from_scale(Vec2::splat(2.0).extend(-1.0)),
+            transform: position,
             ..Default::default()
         },
         Draggable {
