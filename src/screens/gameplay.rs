@@ -36,7 +36,7 @@ impl FromWorld for GameplayMusic {
     fn from_world(world: &mut World) -> Self {
         let assets = world.resource::<AssetServer>();
         Self {
-            handle: assets.load("audio/music/Fluffing A Duck.ogg"),
+            handle: assets.load("audio/music/light_theme.ogg"),
             entity: None,
         }
     }
