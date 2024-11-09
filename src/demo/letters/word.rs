@@ -1,6 +1,13 @@
 use bevy::prelude::*;
 
-use crate::AppSet;
+use crate::{
+    demo::{
+        dnd::{drag::Draggable, drop::DropZone},
+        movement::ScreenWrap,
+    },
+    screens::Screen,
+    AppSet,
+};
 
 use super::letter::Letter;
 
@@ -43,6 +50,14 @@ fn create_new_word(mut create_event: EventReader<CreateNewWord>, mut commands: C
             Word {
                 letters: vec![event.letter.clone()],
             },
+            Draggable {
+                size: Vec2::splat(256.0),
+            },
+            DropZone {
+                size: Vec2::splat(256.0),
+            },
+            ScreenWrap,
+            StateScoped(Screen::Gameplay),
         ));
     }
 }
@@ -56,15 +71,19 @@ pub struct AddLetterToWord {
 
 fn add_letter_to_word(
     mut add_letter_event: EventReader<AddLetterToWord>,
-    mut words: Query<&mut Word>,
+    mut words: Query<(&mut Word, &mut Draggable)>,
 ) {
     for event in add_letter_event.read() {
-        if let Ok(mut word) = words.get_mut(event.word_entity) {
+        if let Ok((mut word, mut draggable)) = words.get_mut(event.word_entity) {
+            //  add letter to the list
             if event.left_side {
                 word.letters.insert(0, event.letter.clone());
             } else {
                 word.letters.push(event.letter.clone());
             }
+
+            //  expend the draggable size
+            draggable.size = Vec2::new(word.letters.len() as f32 * 256.0, 256.0);
         }
     }
 }

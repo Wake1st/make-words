@@ -1,22 +1,15 @@
 use bevy::{input::common_conditions::input_just_pressed, prelude::*};
 
-use crate::{
-    demo::{
-        dnd::{cursor::CursorPosition, drag::Draggable, drop::DropZone},
-        movement::ScreenWrap,
-    },
-    screens::Screen,
-    AppSet,
-};
+use crate::{demo::dnd::cursor::CursorPosition, screens::Screen, AppSet};
 
 use super::word::CreateNewWord;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_event::<SpawnLetter>();
 
-    app.add_systems(Startup, load_letters)
-        .add_systems(
-            Update,
+    app.add_systems(Startup, load_letters).add_systems(
+        Update,
+        (
             (
                 spawn_on_input
                     .in_set(AppSet::Update)
@@ -25,11 +18,10 @@ pub(super) fn plugin(app: &mut App) {
                     .in_set(AppSet::Update)
                     .run_if(input_just_pressed(KeyCode::KeyW)),
             ),
+            spawn_letter.in_set(AppSet::Update),
         )
-        .add_systems(
-            Update,
-            spawn_letter.in_set(AppSet::Update).after(spawn_on_input),
-        );
+            .chain(),
+    );
 }
 
 #[derive(Component)]
@@ -132,14 +124,6 @@ fn spawn_letter(mut spawn_event: EventReader<SpawnLetter>, mut commands: Command
                 transform: position,
                 ..Default::default()
             },
-            Draggable {
-                size: Vec2::splat(256.0),
-            },
-            DropZone {
-                size: Vec2::splat(256.0),
-                ..default()
-            },
-            ScreenWrap,
             StateScoped(Screen::Gameplay),
         ));
     }
