@@ -1,6 +1,12 @@
 use bevy::prelude::*;
 
-use crate::{demo::letters::letter::Letter, AppSet};
+use crate::{
+    demo::letters::{
+        letter::Letter,
+        word::{AddLetterToWord, RemoveWord},
+    },
+    AppSet,
+};
 
 use super::{
     cursor::{store_cursor_position, CursorPosition},
@@ -15,19 +21,16 @@ pub(super) fn plugin(app: &mut App) {
     );
 }
 
+//  TODO: Attach drop zone to words, not letters
 #[derive(Component, Debug)]
 pub struct DropZone {
     pub size: Vec2,
-    pub left_side: Entity,
-    pub right_side: Entity,
 }
 
 impl Default for DropZone {
     fn default() -> Self {
         Self {
             size: Default::default(),
-            left_side: Entity::PLACEHOLDER,
-            right_side: Entity::PLACEHOLDER,
         }
     }
 }
@@ -35,9 +38,11 @@ impl Default for DropZone {
 fn drop(
     buttons: Res<ButtonInput<MouseButton>>,
     dragging: Query<(Entity, &Letter), With<Dragging>>,
-    mut drop_zones: Query<(&Transform, &mut DropZone, &Letter)>,
+    drop_zones: Query<(Entity, &Transform, &DropZone, &Letter)>,
     mut commands: Commands,
     cursor_position: Res<CursorPosition>,
+    mut add_letter_event: EventWriter<AddLetterToWord>,
+    mut remove_word_event: EventWriter<RemoveWord>,
 ) {
     //  Only end on mouse up
     if buttons.just_released(MouseButton::Left) {
@@ -47,7 +52,7 @@ fn drop(
             commands.entity(entity).remove::<Dragging>();
 
             //	check for drop zone
-            for (transform, mut drop_zone, drop_zone_letter) in drop_zones.iter_mut() {
+            for (word_entity, transform, drop_zone, drop_zone_letter) in drop_zones.iter() {
                 //	remove if mouse is in the left or right drop zone
                 let left_translation = transform.translation.xy() + Vec2::new(128.0, 0.0);
                 let left_rect = Rect::from_center_size(left_translation, drop_zone.size);
@@ -57,7 +62,14 @@ fn drop(
                         && dragging_letter.prefixes.contains(&drop_zone_letter.value)
                     {
                         //  attach to dropped letter
-                        drop_zone.left_side = entity;
+                        add_letter_event.send(AddLetterToWord {
+                            word_entity,
+                            letter: dragging_letter.clone(),
+                            left_side: true,
+                        });
+                        remove_word_event.send(RemoveWord {
+                            word_entity: entity,
+                        });
                         info!("droppen left yo!");
                     }
                 }
@@ -70,7 +82,14 @@ fn drop(
                         && dragging_letter.suffixes.contains(&drop_zone_letter.value)
                     {
                         //  attach to dropped letter
-                        drop_zone.right_side = entity;
+                        add_letter_event.send(AddLetterToWord {
+                            word_entity,
+                            letter: dragging_letter.clone(),
+                            left_side: false,
+                        });
+                        remove_word_event.send(RemoveWord {
+                            word_entity: entity,
+                        });
                         info!("droppen right yo!");
                     }
                 }

@@ -16,6 +16,7 @@ pub(super) fn plugin(app: &mut App) {
     );
 }
 
+//  TODO: Attach draggable and dragging to words, not letters
 #[derive(Component, Debug)]
 pub struct Draggable {
     pub size: Vec2,
