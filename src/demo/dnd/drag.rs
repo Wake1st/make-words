@@ -22,7 +22,9 @@ pub struct Draggable {
 }
 
 #[derive(Component, Debug)]
-pub struct Dragging {}
+pub struct Dragging {
+    offset: Vec2,
+}
 
 fn start_drag(
     dragging: Query<&Dragging>,
@@ -43,14 +45,16 @@ fn start_drag(
             let rect = Rect::from_center_size(transform.translation.xy(), draggable.size);
 
             if rect.contains(cursor_position.0) {
-                commands.entity(entity).insert(Dragging {});
+                commands.entity(entity).insert(Dragging {
+                    offset: transform.translation.xy() - cursor_position.0,
+                });
             }
         }
     }
 }
 
-fn drag(mut dragging: Query<&mut Transform, With<Dragging>>, cursor_position: Res<CursorPosition>) {
-    for mut transform in dragging.iter_mut() {
-        transform.translation += cursor_position.0.extend(0.0);
+fn drag(mut draggings: Query<(&mut Transform, &Dragging)>, cursor_position: Res<CursorPosition>) {
+    for (mut transform, dragging) in draggings.iter_mut() {
+        transform.translation = (cursor_position.0 + dragging.offset).extend(0.0);
     }
 }

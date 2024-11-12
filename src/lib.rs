@@ -19,7 +19,13 @@ impl Plugin for AppPlugin {
         // Order new `AppStep` variants by adding them here:
         app.configure_sets(
             Update,
-            (AppSet::TickTimers, AppSet::RecordInput, AppSet::Update).chain(),
+            (
+                AppSet::TickTimers,
+                AppSet::RecordInput,
+                AppSet::Update,
+                AppSet::Despawn,
+            )
+                .chain(),
         );
 
         // Spawn the main camera.
@@ -79,6 +85,7 @@ enum AppSet {
     RecordInput,
     /// Do everything else (consider splitting this into further variants).
     Update,
+    Despawn,
 }
 
 fn spawn_camera(mut commands: Commands) {
