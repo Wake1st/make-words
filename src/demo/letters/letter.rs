@@ -20,21 +20,11 @@ pub(super) fn plugin(app: &mut App) {
     );
 }
 
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct Letter {
     pub value: String,
     pub prefixes: Vec<String>,
     pub suffixes: Vec<String>,
-}
-
-impl Default for Letter {
-    fn default() -> Self {
-        Self {
-            value: Default::default(),
-            prefixes: Default::default(),
-            suffixes: Default::default(),
-        }
-    }
 }
 
 impl Clone for Letter {
