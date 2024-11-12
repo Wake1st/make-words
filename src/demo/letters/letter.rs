@@ -23,16 +23,12 @@ pub(super) fn plugin(app: &mut App) {
 #[derive(Component, Default)]
 pub struct Letter {
     pub value: String,
-    pub prefixes: Vec<String>,
-    pub suffixes: Vec<String>,
 }
 
 impl Clone for Letter {
     fn clone(&self) -> Self {
         Self {
             value: self.value.clone(),
-            prefixes: self.prefixes.clone(),
-            suffixes: self.suffixes.clone(),
         }
     }
 }
@@ -44,18 +40,7 @@ pub struct LetterList {
 
 fn load_letters(mut commands: Commands) {
     commands.insert_resource(LetterList {
-        letters: vec![
-            Letter {
-                value: "b".into(),
-                prefixes: vec!["".into()],
-                suffixes: vec!["o".into()],
-            },
-            Letter {
-                value: "o".into(),
-                prefixes: vec!["b".into()],
-                suffixes: vec!["o".into()],
-            },
-        ],
+        letters: vec![Letter { value: "b".into() }, Letter { value: "o".into() }],
     });
 }
 
