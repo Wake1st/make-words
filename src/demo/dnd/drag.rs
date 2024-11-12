@@ -34,7 +34,7 @@ fn start_drag(
     //  Only start on mouse down
     if buttons.just_pressed(MouseButton::Left) {
         //  Check any dragging exist and return early if true
-        for _ in dragging.iter() {
+        if dragging.iter().next().is_some() {
             return;
         }
 
