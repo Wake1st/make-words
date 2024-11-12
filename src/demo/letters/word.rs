@@ -29,17 +29,9 @@ pub(super) fn plugin(app: &mut App) {
     .add_systems(Update, remove_word.in_set(AppSet::Despawn));
 }
 
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct Word {
     pub letters: Vec<Entity>,
-}
-
-impl Default for Word {
-    fn default() -> Self {
-        Self {
-            letters: Vec::new(),
-        }
-    }
 }
 
 #[derive(Event)]
