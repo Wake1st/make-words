@@ -71,7 +71,7 @@ fn spawn_on_input(
             &mut commands,
         );
         create_word_event.send(CreateNewWord {
-            letter: letter_entity,
+            letters: vec![letter_entity],
             position: cursor_position.0,
         });
     }
@@ -88,7 +88,7 @@ fn spawn_on_input(
             &mut commands,
         );
         create_word_event.send(CreateNewWord {
-            letter: letter_entity,
+            letters: vec![letter_entity],
             position: cursor_position.0,
         });
     }
