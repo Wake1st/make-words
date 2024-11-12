@@ -13,14 +13,16 @@ use super::letter::Letter;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_event::<CreateNewWord>();
-    app.add_event::<AddLetterToWord>();
+    app.add_event::<AddLettersToWord>();
+    app.add_event::<RemoveLettersFromWord>();
     app.add_event::<RemoveWord>();
 
     app.add_systems(
         Update,
         (
             create_new_word,
-            add_letter_to_word,
+            add_letters_to_word,
+            remove_letters_from_word,
             (move_letters_in_word, draw_drop_zones),
         )
             .chain()
@@ -36,7 +38,7 @@ pub struct Word {
 
 #[derive(Event)]
 pub struct CreateNewWord {
-    pub letter: Entity,
+    pub letters: Vec<Entity>,
     pub position: Vec2,
 }
 
@@ -49,7 +51,7 @@ fn create_new_word(mut create_event: EventReader<CreateNewWord>, mut commands: C
                 ..default()
             },
             Word {
-                letters: vec![event.letter],
+                letters: event.letters.clone(),
             },
             Draggable {
                 size: Vec2::splat(256.0),
@@ -64,17 +66,17 @@ fn create_new_word(mut create_event: EventReader<CreateNewWord>, mut commands: C
 }
 
 #[derive(Event)]
-pub struct AddLetterToWord {
+pub struct AddLettersToWord {
     pub word: Entity,
     pub letters: Vec<Entity>,
     pub left_side: bool,
 }
 
-fn add_letter_to_word(
-    mut add_letter_event: EventReader<AddLetterToWord>,
+fn add_letters_to_word(
+    mut add_letters_event: EventReader<AddLettersToWord>,
     mut words: Query<(&mut Word, &mut Draggable)>,
 ) {
-    for event in add_letter_event.read() {
+    for event in add_letters_event.read() {
         info!(
             "adding letters {:?} to word {:?}",
             event.letters, event.word
@@ -86,6 +88,36 @@ fn add_letter_to_word(
             } else {
                 word.letters = [word.letters.clone(), event.letters.clone()].concat();
             }
+
+            //  expend the draggable size
+            draggable.size = Vec2::new(word.letters.len() as f32 * 256.0, 256.0);
+        }
+    }
+}
+
+#[derive(Event)]
+pub struct RemoveLettersFromWord {
+    pub word: Entity,
+    pub letter_index: usize,
+    pub position: Vec2,
+}
+
+/// Removes the letters from the `(letter_index, len]`;
+/// the remaining letters in the word will range from `[0, letter_index)`.
+fn remove_letters_from_word(
+    mut remove_letters_event: EventReader<RemoveLettersFromWord>,
+    mut words: Query<(&mut Word, &mut Draggable)>,
+    mut create_new_word: EventWriter<CreateNewWord>,
+) {
+    for event in remove_letters_event.read() {
+        if let Ok((mut word, mut draggable)) = words.get_mut(event.word) {
+            //  remove the letters and create a new word for them
+            let letters = word.letters.split_off(event.letter_index);
+
+            create_new_word.send(CreateNewWord {
+                letters: letters.clone(),
+                position: event.position + Vec2::new(letters.len() as f32 * 128.0, 0.0),
+            });
 
             //  expend the draggable size
             draggable.size = Vec2::new(word.letters.len() as f32 * 256.0, 256.0);
