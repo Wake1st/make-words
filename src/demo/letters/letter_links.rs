@@ -56,19 +56,20 @@ fn break_words(
         for (word_entity, word_transform, draggable, word) in words.iter() {
             //	ensure the cursor is hovered over the word, then check links
             let word_rect = Rect::from_center_size(word_transform.translation.xy(), draggable.size);
-
-if word_rect.contains(cursor_position.0) {
+            if word_rect.contains(cursor_position.0) {
                 // check the links
-                for (index, link_transform, link) {
-let link_rect = Rect::from_center_size(link_transform.translation.xy(), link.size);
-            if link_rect.contains(cursor_position.0) {
-                remove_letters_event.send(RemoveLettersFromWord {
-                    word: word_entity,
-                    letter_index: index - 1,
-                    position: link_transform.translation.xy(),
-                });
+                for link_entity in word.links.iter() {
+                    if let Ok((index, link_transform, link)) = links.get(link_entity) {
+                        let link_rect = Rect::from_center_size(link_transform.translation.xy(), link.size);
+                        if link_rect.contains(cursor_position.0) {
+                            remove_letters_event.send(RemoveLettersFromWord {
+                                word: word_entity,
+                                letter_index: index - 1,
+                                position: link_transform.translation.xy(),
+                            });
+                        }
+                    }
                 }
-            }
             }
         }
     }
