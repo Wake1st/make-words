@@ -72,6 +72,7 @@ fn spawn_on_input(
         );
         create_word_event.send(CreateNewWord {
             letters: vec![letter_entity],
+            links: Vec::new(),
             position: cursor_position.0,
         });
     }
@@ -89,6 +90,7 @@ fn spawn_on_input(
         );
         create_word_event.send(CreateNewWord {
             letters: vec![letter_entity],
+            links: Vec::new(),
             position: cursor_position.0,
         });
     }

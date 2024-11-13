@@ -9,7 +9,10 @@ use crate::{
     AppSet,
 };
 
-use super::letter::Letter;
+use super::{
+    letter::Letter,
+    letter_links::{spawn_letter_link, LetterLink, SpawnLink},
+};
 
 pub(super) fn plugin(app: &mut App) {
     app.add_event::<CreateNewWord>();
@@ -34,11 +37,13 @@ pub(super) fn plugin(app: &mut App) {
 #[derive(Component, Default)]
 pub struct Word {
     pub letters: Vec<Entity>,
+    pub links: Vec<Entity>,
 }
 
 #[derive(Event)]
 pub struct CreateNewWord {
     pub letters: Vec<Entity>,
+    pub links: Vec<Entity>,
     pub position: Vec2,
 }
 
@@ -52,6 +57,7 @@ fn create_new_word(mut create_event: EventReader<CreateNewWord>, mut commands: C
             },
             Word {
                 letters: event.letters.clone(),
+                links: event.links.clone(),
             },
             Draggable {
                 size: Vec2::splat(256.0),
@@ -112,10 +118,20 @@ fn remove_letters_from_word(
     for event in remove_letters_event.read() {
         if let Ok((mut word, mut draggable)) = words.get_mut(event.word) {
             //  remove the letters and create a new word for them
+            let links = if event.letter_index == 0
+                || event.letter_index == word.letters.len() - 1
+                || word.letters.len() == 2
+            {
+                Vec::new()
+            } else {
+                word.links.split_off(event.letter_index - 1).split_off(1)
+            };
+
             let letters = word.letters.split_off(event.letter_index);
 
             create_new_word.send(CreateNewWord {
                 letters: letters.clone(),
+                links,
                 position: event.position + Vec2::new(letters.len() as f32 * 128.0, 0.0),
             });
 

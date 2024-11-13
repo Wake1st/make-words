@@ -1,8 +1,14 @@
 use bevy::prelude::*;
 
-use crate::{demo::dnd::cursor::CursorPosition, AppSet};
+use crate::{
+    demo::{dnd::cursor::CursorPosition, movement::ScreenWrap},
+    screens::Screen,
+    AppSet,
+};
 
 use super::word::{RemoveLettersFromWord, Word};
+
+const LINK_SIZE: Vec2 = Vec2::new(32.0, 256.0);
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(Update, (break_words.in_set(AppSet::Update),));
@@ -12,9 +18,31 @@ pub(super) fn plugin(app: &mut App) {
 /// a word will break in two at the link.
 #[derive(Component, Clone)]
 pub struct LetterLink {
-    word: Entity,
     index: usize,
     size: Vec2,
+}
+
+pub struct SpawnLink {
+    pub index: usize,
+    pub position: Vec2,
+}
+
+pub fn spawn_letter_link(spawn: SpawnLink, commands: &mut Commands) -> Entity {
+    commands
+        .spawn((
+            Name::new("LetterLink"),
+            TransformBundle {
+                local: Transform::from_translation(spawn.position.extend(0.0)),
+                ..default()
+            },
+            LetterLink {
+                index: spawn.index,
+                size: LINK_SIZE,
+            },
+            ScreenWrap,
+            StateScoped(Screen::Gameplay),
+        ))
+        .id()
 }
 
 fn break_words(
@@ -30,7 +58,7 @@ fn break_words(
             if link_rect.contains(cursor_position.0) {
                 //	break the word!
                 remove_letters_event.send(RemoveLettersFromWord {
-                    word: link.word,
+                    word:,
                     letter_index: link.index + 1,
                     position: link_transform.translation.xy(),
                 });
