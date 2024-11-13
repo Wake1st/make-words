@@ -55,6 +55,7 @@ fn drop(
                     add_letter_event.send(AddLettersToWord {
                         word: drop_zone_entity,
                         letters: dragging_word.letters.clone(),
+                        links: dragging_word.links.clone(),
                         left_side: true,
                     });
                     //  remove old word
@@ -76,6 +77,7 @@ fn drop(
                     add_letter_event.send(AddLettersToWord {
                         word: drop_zone_entity,
                         letters: dragging_word.letters.clone(),
+                        links: dragging_word.links.clone(),
                         left_side: false,
                     });
                     //  remove old word

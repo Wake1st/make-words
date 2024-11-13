@@ -3,6 +3,7 @@ use bevy::{color::palettes::css::WHITE, prelude::*};
 use crate::{
     demo::{
         dnd::{drag::Draggable, drop::DropZone},
+        letters::letter_links::{spawn_letter_link, SpawnLink},
         movement::ScreenWrap,
     },
     screens::Screen,
@@ -11,7 +12,7 @@ use crate::{
 
 use super::{
     letter::Letter,
-    letter_links::{spawn_letter_link, LetterLink, SpawnLink},
+    letter_links::{LetterLink, RemoveLetterLink},
 };
 
 pub(super) fn plugin(app: &mut App) {
@@ -26,7 +27,7 @@ pub(super) fn plugin(app: &mut App) {
             create_new_word,
             add_letters_to_word,
             remove_letters_from_word,
-            (move_letters_in_word, draw_drop_zones),
+            (move_word_components, draw_drop_zones),
         )
             .chain()
             .in_set(AppSet::Update),
@@ -75,24 +76,55 @@ fn create_new_word(mut create_event: EventReader<CreateNewWord>, mut commands: C
 pub struct AddLettersToWord {
     pub word: Entity,
     pub letters: Vec<Entity>,
+    pub links: Vec<Entity>,
     pub left_side: bool,
 }
 
 fn add_letters_to_word(
     mut add_letters_event: EventReader<AddLettersToWord>,
-    mut words: Query<(&mut Word, &mut Draggable)>,
+    mut words: Query<(&Transform, &mut Word, &mut Draggable)>,
+    asset_server: Res<AssetServer>,
+    mut commands: Commands,
 ) {
     for event in add_letters_event.read() {
         info!(
             "adding letters {:?} to word {:?}",
             event.letters, event.word
         );
-        if let Ok((mut word, mut draggable)) = words.get_mut(event.word) {
-            //  add letter to the list
+        if let Ok((transform, mut word, mut draggable)) = words.get_mut(event.word) {
+            //  get the leftmost position of the word
+            let texture = asset_server.load("images/link.png");
+            let word_half_translation = Vec3::new(draggable.size.x / 2.0, 0.0, 0.0);
+
+            //  add letters and links to the list
             if event.left_side {
                 word.letters = [event.letters.clone(), word.letters.clone()].concat();
+                word.links = [
+                    event.links.clone(),
+                    vec![spawn_letter_link(
+                        SpawnLink {
+                            image: texture.clone(),
+                            position: transform.translation - word_half_translation,
+                        },
+                        &mut commands,
+                    )],
+                    word.links.clone(),
+                ]
+                .concat();
             } else {
                 word.letters = [word.letters.clone(), event.letters.clone()].concat();
+                word.links = [
+                    word.links.clone(),
+                    vec![spawn_letter_link(
+                        SpawnLink {
+                            image: texture.clone(),
+                            position: transform.translation + word_half_translation,
+                        },
+                        &mut commands,
+                    )],
+                    event.links.clone(),
+                ]
+                .concat();
             }
 
             //  expend the draggable size
@@ -113,6 +145,7 @@ pub struct RemoveLettersFromWord {
 fn remove_letters_from_word(
     mut remove_letters_event: EventReader<RemoveLettersFromWord>,
     mut words: Query<(&mut Word, &mut Draggable)>,
+    mut remove_link_event: EventWriter<RemoveLetterLink>,
     mut create_new_word: EventWriter<CreateNewWord>,
 ) {
     for event in remove_letters_event.read() {
@@ -124,7 +157,12 @@ fn remove_letters_from_word(
             {
                 Vec::new()
             } else {
-                word.links.split_off(event.letter_index - 1).split_off(1)
+                let mut split = word.links.split_off(event.letter_index - 1);
+                let new_links = split.split_off(1);
+
+                remove_link_event.send(RemoveLetterLink { link: split[0] });
+
+                new_links
             };
 
             let letters = word.letters.split_off(event.letter_index);
@@ -153,18 +191,29 @@ fn remove_word(mut remove_letter_event: EventReader<RemoveWord>, mut commands: C
     }
 }
 
-fn move_letters_in_word(
-    words: Query<(&Transform, &Word)>,
-    mut letters: Query<&mut Transform, (With<Letter>, Without<Word>)>,
+fn move_word_components(
+    words: Query<(&Transform, &Word), (Without<Letter>, Without<LetterLink>)>,
+    mut moving_set: ParamSet<(
+        Query<&mut Transform, With<Letter>>,
+        Query<&mut Transform, With<LetterLink>>,
+    )>,
 ) {
     for (word_transform, word) in words.iter() {
         let word_half_length = word.letters.len() as f32 * 128.0;
 
         for (index, &letter) in word.letters.iter().enumerate() {
-            if let Ok(mut letter_transform) = letters.get_mut(letter) {
+            if let Ok(mut letter_transform) = moving_set.p0().get_mut(letter) {
                 let x =
                     word_transform.translation.x - word_half_length + 256.0 * (0.5 + index as f32);
                 letter_transform.translation = Vec3::new(x, word_transform.translation.y, 0.0);
+            }
+        }
+
+        for (index, &link) in word.links.iter().enumerate() {
+            if let Ok(mut link_transform) = moving_set.p1().get_mut(link) {
+                let x =
+                    word_transform.translation.x - word_half_length + 256.0 * (1.0 + index as f32);
+                link_transform.translation = Vec3::new(x, word_transform.translation.y, 0.0);
             }
         }
     }

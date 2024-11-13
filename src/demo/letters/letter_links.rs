@@ -1,7 +1,10 @@
 use bevy::prelude::*;
 
 use crate::{
-    demo::{dnd::cursor::CursorPosition, movement::ScreenWrap},
+    demo::{
+        dnd::{cursor::CursorPosition, drag::Draggable},
+        movement::ScreenWrap,
+    },
     screens::Screen,
     AppSet,
 };
@@ -11,41 +14,41 @@ use super::word::{RemoveLettersFromWord, Word};
 const LINK_SIZE: Vec2 = Vec2::new(32.0, 256.0);
 
 pub(super) fn plugin(app: &mut App) {
-    app.add_systems(Update, (break_words.in_set(AppSet::Update),));
+    app.add_event::<RemoveLetterLink>();
+
+    app.add_systems(Update, break_word.in_set(AppSet::Update))
+        .add_systems(Update, despawn_link.in_set(AppSet::Despawn));
 }
 
 ///	Links the letters together; when selected,
 /// a word will break in two at the link.
 #[derive(Component, Clone)]
 pub struct LetterLink {
-    index: usize,
     size: Vec2,
 }
 
 pub struct SpawnLink {
-    pub index: usize,
-    pub position: Vec2,
+    pub image: Handle<Image>,
+    pub position: Vec3,
 }
 
 pub fn spawn_letter_link(spawn: SpawnLink, commands: &mut Commands) -> Entity {
     commands
         .spawn((
             Name::new("LetterLink"),
-            TransformBundle {
-                local: Transform::from_translation(spawn.position.extend(0.0)),
+            SpriteBundle {
+                texture: spawn.image.clone(),
+                transform: Transform::from_translation(spawn.position),
                 ..default()
             },
-            LetterLink {
-                index: spawn.index,
-                size: LINK_SIZE,
-            },
+            LetterLink { size: LINK_SIZE },
             ScreenWrap,
             StateScoped(Screen::Gameplay),
         ))
         .id()
 }
 
-fn break_words(
+fn break_word(
     buttons: Res<ButtonInput<MouseButton>>,
     words: Query<(Entity, &Transform, &Draggable, &Word)>,
     links: Query<(&Transform, &LetterLink)>,
@@ -58,9 +61,10 @@ fn break_words(
             let word_rect = Rect::from_center_size(word_transform.translation.xy(), draggable.size);
             if word_rect.contains(cursor_position.0) {
                 // check the links
-                for link_entity in word.links.iter() {
-                    if let Ok((index, link_transform, link)) = links.get(link_entity) {
-                        let link_rect = Rect::from_center_size(link_transform.translation.xy(), link.size);
+                for (index, &link_entity) in word.links.iter().enumerate() {
+                    if let Ok((link_transform, link)) = links.get(link_entity) {
+                        let link_rect =
+                            Rect::from_center_size(link_transform.translation.xy(), link.size);
                         if link_rect.contains(cursor_position.0) {
                             remove_letters_event.send(RemoveLettersFromWord {
                                 word: word_entity,
@@ -76,18 +80,13 @@ fn break_words(
 }
 
 #[derive(Event)]
-pub struct ReIndexLetterLink {}
+pub struct RemoveLetterLink {
+    pub link: Entity,
+}
 
-fn calculate_link_index(
-    mut reindex_event: EventReader<ReIndexLetterLink>,
-    mut words: Query<(Entity, &Word)>,
-    mut links: Query<&mut LetterLink>,
-) {
-    for event in reindex_event.read() {
-        for (word_entity, word) in words.iter() {
-            for link in links.iter_mut() {
-                if link.word == word_entity {}
-            }
-        }
+fn despawn_link(mut remove_event: EventReader<RemoveLetterLink>, mut commands: Commands) {
+    for event in remove_event.read() {
+        info!("removing {:?}", event.link);
+        commands.entity(event.link).despawn_recursive();
     }
 }
