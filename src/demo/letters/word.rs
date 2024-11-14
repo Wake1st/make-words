@@ -15,11 +15,14 @@ use super::{
     letter_links::{LetterLink, RemoveLetterLink},
 };
 
+const SHIFT_DISTANCE: f32 = 100.0;
+
 pub(super) fn plugin(app: &mut App) {
     app.add_event::<CreateNewWord>();
     app.add_event::<AddLettersToWord>();
     app.add_event::<RemoveLettersFromWord>();
     app.add_event::<RemoveWord>();
+    app.add_event::<ShiftWord>();
 
     app.add_systems(
         Update,
@@ -27,6 +30,7 @@ pub(super) fn plugin(app: &mut App) {
             create_new_word,
             add_letters_to_word,
             remove_letters_from_word,
+            shift_word,
             (move_word_components, draw_drop_zones),
         )
             .chain()
@@ -136,7 +140,7 @@ fn add_letters_to_word(
 #[derive(Event)]
 pub struct RemoveLettersFromWord {
     pub word: Entity,
-    pub letter_index: usize,
+    pub link_index: usize,
     pub position: Vec2,
 }
 
@@ -147,34 +151,55 @@ fn remove_letters_from_word(
     mut words: Query<(&mut Word, &mut Draggable)>,
     mut remove_link_event: EventWriter<RemoveLetterLink>,
     mut create_new_word: EventWriter<CreateNewWord>,
+    mut shift_word_event: EventWriter<ShiftWord>,
 ) {
     for event in remove_letters_event.read() {
         if let Ok((mut word, mut draggable)) = words.get_mut(event.word) {
             //  remove the letters and create a new word for them
-            let links = if event.letter_index == 0
-                || event.letter_index == word.letters.len() - 1
-                || word.letters.len() == 2
-            {
+            let links = if event.link_index == word.links.len() - 1 {
+                let split = word.links.split_off(0);
+                remove_link_event.send(RemoveLetterLink { link: split[0] });
+
                 Vec::new()
             } else {
-                let mut split = word.links.split_off(event.letter_index - 1);
-                let new_links = split.split_off(1);
+                let mut split = word.links.split_off(event.link_index);
+                let new_links = split.split_off(if split.len() == 1 { 0 } else { 1 });
+                info!(
+                    "split len(): {:?}\tword links len(): {:?}\tnew link len(): {:?}",
+                    split.len(),
+                    new_links.len(),
+                    word.links.len(),
+                );
 
                 remove_link_event.send(RemoveLetterLink { link: split[0] });
 
                 new_links
             };
 
-            let letters = word.letters.split_off(event.letter_index);
+            let letters = word.letters.split_off(event.link_index + 1);
+            info!(
+                "letters - \tbroke-off: {:?}\tremaining: {:?}",
+                letters, word.letters
+            );
 
             create_new_word.send(CreateNewWord {
                 letters: letters.clone(),
                 links,
-                position: event.position + Vec2::new(letters.len() as f32 * 128.0, 0.0),
+                position: event.position
+                    + Vec2::new(
+                        letters.len() as f32 * 128.0 + SHIFT_DISTANCE,
+                        SHIFT_DISTANCE,
+                    ),
             });
 
             //  expend the draggable size
             draggable.size = Vec2::new(word.letters.len() as f32 * 256.0, 256.0);
+
+            //  shift the old word away
+            shift_word_event.send(ShiftWord {
+                word: event.word,
+                leftward: true,
+            });
         }
     }
 }
@@ -229,5 +254,24 @@ fn draw_drop_zones(words: Query<(&Transform, &Word)>, mut gizmos: Gizmos) {
 
         let right_translation = transform.translation.xy() + zone_adjustment;
         gizmos.rect_2d(right_translation, 0., Vec2::splat(256.), WHITE);
+    }
+}
+
+#[derive(Event)]
+pub struct ShiftWord {
+    pub word: Entity,
+    pub leftward: bool,
+}
+
+fn shift_word(
+    mut shift_event: EventReader<ShiftWord>,
+    mut words: Query<&mut Transform, With<Word>>,
+) {
+    for event in shift_event.read() {
+        if let Ok(mut transform) = words.get_mut(event.word) {
+            let direction = if event.leftward { -1.0 } else { 1.0 };
+            transform.translation +=
+                Vec3::new(direction * SHIFT_DISTANCE, direction * SHIFT_DISTANCE, 0.0);
+        }
     }
 }

@@ -56,19 +56,20 @@ fn break_word(
     mut remove_letters_event: EventWriter<RemoveLettersFromWord>,
 ) {
     if buttons.just_pressed(MouseButton::Right) {
+        //	check if cursor is hovered over a word
         for (word_entity, word_transform, draggable, word) in words.iter() {
-            //	ensure the cursor is hovered over the word, then check links
             let word_rect = Rect::from_center_size(word_transform.translation.xy(), draggable.size);
             if word_rect.contains(cursor_position.0) {
-                // check the links
+                // check if cursor is hovered over the word's links
                 for (index, &link_entity) in word.links.iter().enumerate() {
                     if let Ok((link_transform, link)) = links.get(link_entity) {
                         let link_rect =
                             Rect::from_center_size(link_transform.translation.xy(), link.size);
                         if link_rect.contains(cursor_position.0) {
+                            //  remove the letters from the right side
                             remove_letters_event.send(RemoveLettersFromWord {
                                 word: word_entity,
-                                letter_index: index - 1,
+                                link_index: index,
                                 position: link_transform.translation.xy(),
                             });
                         }
