@@ -13,4 +13,4 @@ This game was made using the [bevy new 2d template](https://github.com/TheBevyFl
 - [ ] add word sounds
 - [ ] user can hear a word when selecting (left-click)
 - [ ] user can hear a new word being made with audio feedback
-- [ ] add characters from other languages (go crazy)
+- [ ] add characters from other languages (go crazy) (tongue clicks)
