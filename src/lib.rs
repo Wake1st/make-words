@@ -23,6 +23,7 @@ impl Plugin for AppPlugin {
                 AppSet::TickTimers,
                 AppSet::RecordInput,
                 AppSet::Update,
+                AppSet::AudioFeedback,
                 AppSet::Despawn,
             )
                 .chain(),
@@ -85,6 +86,7 @@ enum AppSet {
     RecordInput,
     /// Do everything else (consider splitting this into further variants).
     Update,
+    AudioFeedback,
     Despawn,
 }
 

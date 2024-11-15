@@ -29,6 +29,7 @@ pub struct Letter {
     pub value: String,
     pub asset_path: String,
     pub sound_path: String,
+    pub sound_duration: f32,
 }
 
 impl Clone for Letter {
@@ -37,6 +38,7 @@ impl Clone for Letter {
             value: self.value.clone(),
             asset_path: self.asset_path.clone(),
             sound_path: self.sound_path.clone(),
+            sound_duration: self.sound_duration.clone(),
         }
     }
 }
@@ -55,14 +57,14 @@ fn spawn_on_input(
     cursor_position: Res<CursorPosition>,
     mut spawn_letter: EventWriter<SpawnLetter>,
 ) {
-    let mut letter: Letter = letter_list.letters[0].clone();
+    let mut letter: Letter = letter_list.letters[1].clone();
 
     if input.just_pressed(KeyCode::KeyQ) {
-        letter = letter_list.letters[0].clone();
+        letter = letter_list.letters[1].clone();
     }
 
     if input.just_pressed(KeyCode::KeyW) {
-        letter = letter_list.letters[1].clone();
+        letter = letter_list.letters[14].clone();
     }
 
     let texture: Handle<Image> = asset_server.load(format!("images/{}", letter.asset_path));

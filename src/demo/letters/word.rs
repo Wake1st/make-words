@@ -1,7 +1,6 @@
 use bevy::{color::palettes::css::WHITE, prelude::*};
 
 use crate::{
-    audio::SoundEffect,
     demo::{
         dnd::{drag::Draggable, drop::DropZone},
         letters::letter_links::{spawn_letter_link, SpawnLink},
@@ -14,6 +13,7 @@ use crate::{
 use super::{
     letter::Letter,
     letter_links::{LetterLink, RemoveLetterLink},
+    sounds::PlayWordSounds,
 };
 
 const SHIFT_DISTANCE: f32 = 100.0;
@@ -31,7 +31,6 @@ pub(super) fn plugin(app: &mut App) {
             create_new_word,
             add_letters_to_word,
             remove_letters_from_word,
-            play_break_sound,
             shift_word,
             (move_word_components, draw_drop_zones),
         )
@@ -91,6 +90,7 @@ fn add_letters_to_word(
     mut words: Query<(&Transform, &mut Word, &mut Draggable)>,
     asset_server: Res<AssetServer>,
     mut commands: Commands,
+    mut play_word_sounds: EventWriter<PlayWordSounds>,
 ) {
     for event in add_letters_event.read() {
         if let Ok((transform, mut word, mut draggable)) = words.get_mut(event.word) {
@@ -131,6 +131,9 @@ fn add_letters_to_word(
 
             //  expend the draggable size
             draggable.size = Vec2::new(word.letters.len() as f32 * 256.0, 256.0);
+
+            //  play the sound of the combined word
+            play_word_sounds.send(PlayWordSounds { word: event.word });
         }
     }
 }
@@ -266,23 +269,5 @@ fn shift_word(
             transform.translation +=
                 Vec3::new(direction * SHIFT_DISTANCE, direction * SHIFT_DISTANCE, 0.0);
         }
-    }
-}
-
-fn play_break_sound(
-    mut break_word_event: EventReader<RemoveLettersFromWord>,
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-) {
-    for _ in break_word_event.read() {
-        let source = asset_server.load("audio/sound_effects/mouse_click.ogg");
-
-        commands.spawn((
-            AudioBundle {
-                source,
-                settings: PlaybackSettings::DESPAWN,
-            },
-            SoundEffect,
-        ));
     }
 }

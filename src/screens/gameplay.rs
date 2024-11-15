@@ -1,6 +1,10 @@
 //! The screen state for the main gameplay.
 
-use bevy::{input::common_conditions::input_just_pressed, prelude::*};
+use bevy::{
+    audio::{PlaybackMode, Volume},
+    input::common_conditions::input_just_pressed,
+    prelude::*,
+};
 
 use crate::{
     asset_tracking::LoadResource, audio::Music, demo::level::spawn_level as spawn_level_command,
@@ -48,7 +52,11 @@ fn play_gameplay_music(mut commands: Commands, mut music: ResMut<GameplayMusic>)
             .spawn((
                 AudioBundle {
                     source: music.handle.clone(),
-                    settings: PlaybackSettings::LOOP,
+                    settings: PlaybackSettings {
+                        mode: PlaybackMode::Loop,
+                        volume: Volume::new(0.4),
+                        ..default()
+                    },
                 },
                 Music,
             ))

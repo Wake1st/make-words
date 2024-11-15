@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::AppSet;
+use crate::{demo::letters::sounds::PlayWordSounds, AppSet};
 
 use super::cursor::{store_cursor_position, CursorPosition};
 
@@ -32,6 +32,7 @@ fn start_drag(
     cursor_position: Res<CursorPosition>,
     buttons: Res<ButtonInput<MouseButton>>,
     mut commands: Commands,
+    mut play_word_sounds: EventWriter<PlayWordSounds>,
 ) {
     //  Only start on mouse down
     if buttons.just_pressed(MouseButton::Left) {
@@ -45,9 +46,13 @@ fn start_drag(
             let rect = Rect::from_center_size(transform.translation.xy(), draggable.size);
 
             if rect.contains(cursor_position.0) {
+                //  add dragging component to the word
                 commands.entity(entity).insert(Dragging {
                     offset: transform.translation.xy() - cursor_position.0,
                 });
+
+                //  play the sounds of the word
+                play_word_sounds.send(PlayWordSounds { word: entity });
             }
         }
     }

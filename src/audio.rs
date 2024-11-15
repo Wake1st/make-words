@@ -11,7 +11,7 @@ use bevy::prelude::*;
 ///
 /// fn set_music_volume(sink_query: Query<&AudioSink, With<Music>>) {
 ///     for sink in &sink_query {
-///         sink.set_volume(0.5);
+///         sink.set_volume(0.1);
 ///     }
 /// }
 /// ```
@@ -29,7 +29,7 @@ pub struct Music;
 ///
 /// fn set_sound_effect_volume(sink_query: Query<&AudioSink, With<SoundEffect>>) {
 ///     for sink in &sink_query {
-///         sink.set_volume(0.5);
+///         sink.set_volume(2.0);
 ///     }
 /// }
 /// ```
