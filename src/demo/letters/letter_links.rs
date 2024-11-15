@@ -20,8 +20,8 @@ pub(super) fn plugin(app: &mut App) {
         .add_systems(Update, despawn_link.in_set(AppSet::Despawn));
 }
 
-///	Links the letters together; when selected,
-/// a word will break in two at the link.
+///    Links the letters together; when selected,
+///    a word will break in two at the link.
 #[derive(Component, Clone)]
 pub struct LetterLink {
     size: Vec2,
