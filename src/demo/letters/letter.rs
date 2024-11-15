@@ -13,10 +13,19 @@ pub(super) fn plugin(app: &mut App) {
             (
                 spawn_on_input
                     .in_set(AppSet::Update)
-                    .run_if(input_just_pressed(KeyCode::KeyQ)),
+                    .run_if(input_just_pressed(KeyCode::KeyA)),
                 spawn_on_input
                     .in_set(AppSet::Update)
-                    .run_if(input_just_pressed(KeyCode::KeyW)),
+                    .run_if(input_just_pressed(KeyCode::KeyB)),
+                spawn_on_input
+                    .in_set(AppSet::Update)
+                    .run_if(input_just_pressed(KeyCode::KeyC)),
+                spawn_on_input
+                    .in_set(AppSet::Update)
+                    .run_if(input_just_pressed(KeyCode::KeyD)),
+                spawn_on_input
+                    .in_set(AppSet::Update)
+                    .run_if(input_just_pressed(KeyCode::KeyO)),
             ),
             spawn_letter,
         )
@@ -59,11 +68,23 @@ fn spawn_on_input(
 ) {
     let mut letter: Letter = letter_list.letters[1].clone();
 
-    if input.just_pressed(KeyCode::KeyQ) {
+    if input.just_pressed(KeyCode::KeyA) {
+        letter = letter_list.letters[0].clone();
+    }
+
+    if input.just_pressed(KeyCode::KeyB) {
         letter = letter_list.letters[1].clone();
     }
 
-    if input.just_pressed(KeyCode::KeyW) {
+    if input.just_pressed(KeyCode::KeyC) {
+        letter = letter_list.letters[2].clone();
+    }
+
+    if input.just_pressed(KeyCode::KeyD) {
+        letter = letter_list.letters[3].clone();
+    }
+
+    if input.just_pressed(KeyCode::KeyO) {
         letter = letter_list.letters[14].clone();
     }
 

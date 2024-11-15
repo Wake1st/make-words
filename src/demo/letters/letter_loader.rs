@@ -19,7 +19,7 @@ fn load_letters(mut commands: Commands) {
                 value: "a".into(),
                 asset_path: "a.png".into(),
                 sound_path: "a.ogg".into(),
-                sound_duration: 0.0,
+                sound_duration: 0.03,
             },
             Letter {
                 value: "b".into(),
@@ -31,13 +31,13 @@ fn load_letters(mut commands: Commands) {
                 value: "c".into(),
                 asset_path: "c.png".into(),
                 sound_path: "c.ogg".into(),
-                sound_duration: 0.0,
+                sound_duration: 0.014,
             },
             Letter {
                 value: "d".into(),
                 asset_path: "d.png".into(),
                 sound_path: "d.ogg".into(),
-                sound_duration: 0.0,
+                sound_duration: 0.04,
             },
             Letter {
                 value: "e".into(),
