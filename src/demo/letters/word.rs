@@ -1,6 +1,7 @@
 use bevy::{color::palettes::css::WHITE, prelude::*};
 
 use crate::{
+    audio::SoundEffect,
     demo::{
         dnd::{drag::Draggable, drop::DropZone},
         letters::letter_links::{spawn_letter_link, SpawnLink},
@@ -30,6 +31,7 @@ pub(super) fn plugin(app: &mut App) {
             create_new_word,
             add_letters_to_word,
             remove_letters_from_word,
+            play_break_sound,
             shift_word,
             (move_word_components, draw_drop_zones),
         )
@@ -264,5 +266,23 @@ fn shift_word(
             transform.translation +=
                 Vec3::new(direction * SHIFT_DISTANCE, direction * SHIFT_DISTANCE, 0.0);
         }
+    }
+}
+
+fn play_break_sound(
+    mut break_word_event: EventReader<RemoveLettersFromWord>,
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+) {
+    for _ in break_word_event.read() {
+        let source = asset_server.load("audio/sound_effects/mouse_click.ogg");
+
+        commands.spawn((
+            AudioBundle {
+                source,
+                settings: PlaybackSettings::DESPAWN,
+            },
+            SoundEffect,
+        ));
     }
 }
