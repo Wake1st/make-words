@@ -65,7 +65,7 @@ fn create_new_word(mut create_event: EventReader<CreateNewWord>, mut commands: C
                 links: event.links.clone(),
             },
             Draggable {
-                size: Vec2::splat(256.0),
+                size: Vec2::new(event.letters.len() as f32 * 256.0, 256.0),
             },
             DropZone {
                 size: Vec2::splat(256.0),
@@ -91,10 +91,6 @@ fn add_letters_to_word(
     mut commands: Commands,
 ) {
     for event in add_letters_event.read() {
-        info!(
-            "adding letters {:?} to word {:?}",
-            event.letters, event.word
-        );
         if let Ok((transform, mut word, mut draggable)) = words.get_mut(event.word) {
             //  get the leftmost position of the word
             let texture = asset_server.load("images/link.png");
@@ -157,7 +153,7 @@ fn remove_letters_from_word(
         if let Ok((mut word, mut draggable)) = words.get_mut(event.word) {
             //  remove the letters and create a new word for them
             let links = if event.link_index == word.links.len() - 1 {
-                let split = word.links.split_off(0);
+                let split = word.links.split_off(event.link_index);
                 remove_link_event.send(RemoveLetterLink { link: split[0] });
 
                 Vec::new()
@@ -177,10 +173,6 @@ fn remove_letters_from_word(
             };
 
             let letters = word.letters.split_off(event.link_index + 1);
-            info!(
-                "letters - \tbroke-off: {:?}\tremaining: {:?}",
-                letters, word.letters
-            );
 
             create_new_word.send(CreateNewWord {
                 letters: letters.clone(),
@@ -211,7 +203,6 @@ pub struct RemoveWord {
 
 fn remove_word(mut remove_letter_event: EventReader<RemoveWord>, mut commands: Commands) {
     for event in remove_letter_event.read() {
-        info!("removing {:?}", event.word);
         commands.entity(event.word).despawn_recursive();
     }
 }
