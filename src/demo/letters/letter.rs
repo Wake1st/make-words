@@ -67,7 +67,7 @@ fn spawn_on_input(
         letter = letter_list.letters[14].clone();
     }
 
-    let texture: Handle<Image> = asset_server.load(format!("images/{}", letter.asset_path));
+    let texture: Handle<Image> = asset_server.load(format!("images/letters/{}", letter.asset_path));
     spawn_letter.send(SpawnLetter {
         letter: letter.clone(),
         position: cursor_position.0,
