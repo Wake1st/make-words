@@ -18,7 +18,7 @@ pub(super) fn plugin(app: &mut App) {
     app.load_resource::<PlayerAssets>();
 
     // Record directional input as movement controls.
-    app.add_systems(Update, cursor_position.in_set(AppSet::RecordInput));
+    app.add_systems(Update, animate_cursor.in_set(AppSet::RecordInput));
 }
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Default, Reflect)]
@@ -66,7 +66,7 @@ fn spawn_player(
     ));
 }
 
-fn cursor_position(
+fn animate_cursor(
     q_windows: Query<&Window, With<PrimaryWindow>>,
     mut transform_query: Query<&mut Transform, With<Player>>,
 ) {

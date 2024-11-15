@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
-    demo::letters::word::{AddLetterToWord, RemoveWord, Word},
+    demo::letters::word::{AddLettersToWord, RemoveWord, Word},
     AppSet,
 };
 
@@ -25,7 +25,7 @@ fn drop(
     dragging: Query<(Entity, &Transform, &Word), With<Dragging>>,
     mut commands: Commands,
     drop_zones: Query<(Entity, &Transform, &DropZone, &Word)>,
-    mut add_letter_event: EventWriter<AddLetterToWord>,
+    mut add_letter_event: EventWriter<AddLettersToWord>,
     mut remove_word_event: EventWriter<RemoveWord>,
 ) {
     //  Only end on mouse up
@@ -52,9 +52,10 @@ fn drop(
 
                 if drop_zone_left.contains(dragging_right_origin) {
                     //  attach to dropped letter
-                    add_letter_event.send(AddLetterToWord {
+                    add_letter_event.send(AddLettersToWord {
                         word: drop_zone_entity,
                         letters: dragging_word.letters.clone(),
+                        links: dragging_word.links.clone(),
                         left_side: true,
                     });
                     //  remove old word
@@ -73,9 +74,10 @@ fn drop(
 
                 if drop_zone_right.contains(dragging_left_origin) {
                     //  attach to dropped letter
-                    add_letter_event.send(AddLetterToWord {
+                    add_letter_event.send(AddLettersToWord {
                         word: drop_zone_entity,
                         letters: dragging_word.letters.clone(),
+                        links: dragging_word.links.clone(),
                         left_side: false,
                     });
                     //  remove old word
