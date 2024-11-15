@@ -10,7 +10,7 @@ This game was made using the [bevy new 2d template](https://github.com/TheBevyFl
 
 - [x] remove "prefix/suffix" data
 - [x] user can "break" a word apart into two words, bisected near where the cursor is (right-click)
+- [ ] add characters from other languages (go crazy) (tongue clicks)
 - [ ] add word sounds
 - [ ] user can hear a word when selecting (left-click)
 - [ ] user can hear a new word being made with audio feedback
-- [ ] add characters from other languages (go crazy) (tongue clicks)
