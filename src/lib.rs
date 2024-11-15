@@ -12,6 +12,8 @@ use bevy::{
     prelude::*,
 };
 
+const BACKGROUND_COLOR: Color = Color::srgb(0.04313725, 0.9568627450980393, 0.9333333333333333);
+
 pub struct AppPlugin;
 
 impl Plugin for AppPlugin {
@@ -68,6 +70,9 @@ impl Plugin for AppPlugin {
             screens::plugin,
             theme::plugin,
         ));
+
+        // Set background color
+        app.insert_resource(ClearColor(BACKGROUND_COLOR));
 
         // Enable dev tools for dev builds.
         #[cfg(feature = "dev")]
