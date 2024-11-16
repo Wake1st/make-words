@@ -84,6 +84,46 @@ fn spawn_on_input(
         letter = letter_list.letters[3].clone();
     }
 
+    if input.just_pressed(KeyCode::KeyE) {
+        letter = letter_list.letters[4].clone();
+    }
+
+    if input.just_pressed(KeyCode::KeyF) {
+        letter = letter_list.letters[5].clone();
+    }
+
+    if input.just_pressed(KeyCode::KeyG) {
+        letter = letter_list.letters[6].clone();
+    }
+
+    if input.just_pressed(KeyCode::KeyH) {
+        letter = letter_list.letters[7].clone();
+    }
+
+    if input.just_pressed(KeyCode::KeyI) {
+        letter = letter_list.letters[8].clone();
+    }
+
+    if input.just_pressed(KeyCode::KeyJ) {
+        letter = letter_list.letters[9].clone();
+    }
+
+    if input.just_pressed(KeyCode::KeyK) {
+        letter = letter_list.letters[10].clone();
+    }
+
+    if input.just_pressed(KeyCode::KeyL) {
+        letter = letter_list.letters[11].clone();
+    }
+
+    if input.just_pressed(KeyCode::KeyM) {
+        letter = letter_list.letters[12].clone();
+    }
+
+    if input.just_pressed(KeyCode::KeyN) {
+        letter = letter_list.letters[13].clone();
+    }
+
     if input.just_pressed(KeyCode::KeyO) {
         letter = letter_list.letters[14].clone();
     }
