@@ -1,36 +1,13 @@
-use bevy::{input::common_conditions::input_just_pressed, prelude::*};
+use bevy::prelude::*;
 
-use crate::{demo::dnd::cursor::CursorPosition, screens::Screen, AppSet};
+use crate::screens::Screen;
 
-use super::{letter_loader::LetterList, word::CreateNewWord};
+use super::word::CreateNewWord;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_event::<SpawnLetter>();
 
-    app.add_systems(
-        Update,
-        (
-            (
-                spawn_on_input
-                    .in_set(AppSet::Update)
-                    .run_if(input_just_pressed(KeyCode::KeyA)),
-                spawn_on_input
-                    .in_set(AppSet::Update)
-                    .run_if(input_just_pressed(KeyCode::KeyB)),
-                spawn_on_input
-                    .in_set(AppSet::Update)
-                    .run_if(input_just_pressed(KeyCode::KeyC)),
-                spawn_on_input
-                    .in_set(AppSet::Update)
-                    .run_if(input_just_pressed(KeyCode::KeyD)),
-                spawn_on_input
-                    .in_set(AppSet::Update)
-                    .run_if(input_just_pressed(KeyCode::KeyO)),
-            ),
-            spawn_letter,
-        )
-            .chain(),
-    );
+    app.add_systems(Update, (spawn_letter,).chain());
 }
 
 #[derive(Component, Default)]
@@ -54,86 +31,9 @@ impl Clone for Letter {
 
 #[derive(Event)]
 pub struct SpawnLetter {
-    letter: Letter,
-    position: Vec2,
-    image: Handle<Image>,
-}
-
-fn spawn_on_input(
-    input: Res<ButtonInput<KeyCode>>,
-    asset_server: Res<AssetServer>,
-    letter_list: Res<LetterList>,
-    cursor_position: Res<CursorPosition>,
-    mut spawn_letter: EventWriter<SpawnLetter>,
-) {
-    let mut letter: Letter = letter_list.letters[1].clone();
-
-    if input.just_pressed(KeyCode::KeyA) {
-        letter = letter_list.letters[0].clone();
-    }
-
-    if input.just_pressed(KeyCode::KeyB) {
-        letter = letter_list.letters[1].clone();
-    }
-
-    if input.just_pressed(KeyCode::KeyC) {
-        letter = letter_list.letters[2].clone();
-    }
-
-    if input.just_pressed(KeyCode::KeyD) {
-        letter = letter_list.letters[3].clone();
-    }
-
-    if input.just_pressed(KeyCode::KeyE) {
-        letter = letter_list.letters[4].clone();
-    }
-
-    if input.just_pressed(KeyCode::KeyF) {
-        letter = letter_list.letters[5].clone();
-    }
-
-    if input.just_pressed(KeyCode::KeyG) {
-        letter = letter_list.letters[6].clone();
-    }
-
-    if input.just_pressed(KeyCode::KeyH) {
-        letter = letter_list.letters[7].clone();
-    }
-
-    if input.just_pressed(KeyCode::KeyI) {
-        letter = letter_list.letters[8].clone();
-    }
-
-    if input.just_pressed(KeyCode::KeyJ) {
-        letter = letter_list.letters[9].clone();
-    }
-
-    if input.just_pressed(KeyCode::KeyK) {
-        letter = letter_list.letters[10].clone();
-    }
-
-    if input.just_pressed(KeyCode::KeyL) {
-        letter = letter_list.letters[11].clone();
-    }
-
-    if input.just_pressed(KeyCode::KeyM) {
-        letter = letter_list.letters[12].clone();
-    }
-
-    if input.just_pressed(KeyCode::KeyN) {
-        letter = letter_list.letters[13].clone();
-    }
-
-    if input.just_pressed(KeyCode::KeyO) {
-        letter = letter_list.letters[14].clone();
-    }
-
-    let texture: Handle<Image> = asset_server.load(format!("images/letters/{}", letter.asset_path));
-    spawn_letter.send(SpawnLetter {
-        letter: letter.clone(),
-        position: cursor_position.0,
-        image: texture.clone(),
-    });
+    pub letter: Letter,
+    pub position: Vec2,
+    pub image: Handle<Image>,
 }
 
 fn spawn_letter(
