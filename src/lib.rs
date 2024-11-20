@@ -12,6 +12,8 @@ use bevy::{
     prelude::*,
 };
 
+const BACKGROUND_COLOR: Color = Color::srgb(0.04313725, 0.95686275, 0.93333333);
+
 pub struct AppPlugin;
 
 impl Plugin for AppPlugin {
@@ -23,6 +25,7 @@ impl Plugin for AppPlugin {
                 AppSet::TickTimers,
                 AppSet::RecordInput,
                 AppSet::Update,
+                AppSet::AudioFeedback,
                 AppSet::Despawn,
             )
                 .chain(),
@@ -68,6 +71,9 @@ impl Plugin for AppPlugin {
             theme::plugin,
         ));
 
+        // Set background color
+        app.insert_resource(ClearColor(BACKGROUND_COLOR));
+
         // Enable dev tools for dev builds.
         #[cfg(feature = "dev")]
         app.add_plugins(dev_tools::plugin);
@@ -85,6 +91,7 @@ enum AppSet {
     RecordInput,
     /// Do everything else (consider splitting this into further variants).
     Update,
+    AudioFeedback,
     Despawn,
 }
 
