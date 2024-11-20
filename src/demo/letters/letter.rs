@@ -24,7 +24,7 @@ impl Clone for Letter {
             value: self.value.clone(),
             asset_path: self.asset_path.clone(),
             sound_path: self.sound_path.clone(),
-            sound_duration: self.sound_duration.clone(),
+            sound_duration: self.sound_duration,
         }
     }
 }

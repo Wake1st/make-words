@@ -12,7 +12,7 @@ use bevy::{
     prelude::*,
 };
 
-const BACKGROUND_COLOR: Color = Color::srgb(0.04313725, 0.9568627450980393, 0.9333333333333333);
+const BACKGROUND_COLOR: Color = Color::srgb(0.04313725, 0.95686275, 0.93333333);
 
 pub struct AppPlugin;
 
