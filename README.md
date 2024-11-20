@@ -13,6 +13,7 @@ This game was made using the [bevy new 2d template](https://github.com/TheBevyFl
 - [x] add word sounds
 - [x] user can hear a word when selecting (left-click)
 - [x] user can hear a new word being made
-- [ ] add characters from other languages (go crazy) (tongue clicks)
-  - [ ] 2D sprite textures
-  - [ ] audio sources
+- [x] add characters from other languages (go crazy) (tongue clicks)
+  - [x] 2D sprite textures
+  - [x] audio sources
+- [ ] games has `bucket-O-letters` to pull from
