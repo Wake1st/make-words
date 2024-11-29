@@ -14,7 +14,7 @@ pub struct LetterList {
     pub letters: Vec<Letter>,
 }
 
-fn load_letters(mut commands: Commands) {
+pub fn load_letters(mut commands: Commands) {
     commands.insert_resource(LetterList {
         letters: vec![
             //	english

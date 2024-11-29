@@ -1,18 +1,23 @@
 use bevy::prelude::*;
 
-use crate::{demo::letters::letter_loader::LetterList, screens::Screen, AppSet};
+use crate::{
+    demo::letters::letter_loader::{load_letters, LetterList},
+    screens::Screen,
+    AppSet,
+};
 
 use super::interaction::{CloseDrawer, OpenDrawer};
 
 const UI_BASE_WIDTH: f32 = 288.;
 
 pub(super) fn plugin(app: &mut App) {
-    app.add_systems(Startup, setup_drawer).add_systems(
-        Update,
-        ((show_drawer, hide_drawer), slide_drawer)
-            .chain()
-            .in_set(AppSet::Update),
-    );
+    app.add_systems(Startup, setup_drawer.after(load_letters))
+        .add_systems(
+            Update,
+            ((show_drawer, hide_drawer), slide_drawer)
+                .chain()
+                .in_set(AppSet::Update),
+        );
 }
 
 #[derive(Component)]
@@ -108,17 +113,13 @@ fn hide_drawer(
 
 fn slide_drawer(mut drawer_query: Query<(&mut Transform, &LetterDrawer)>, time: Res<Time>) {
     if let Ok((mut transform, drawer)) = drawer_query.get_single_mut() {
-        let direction = (drawer.target_position.extend(0.0) - transform.translation).normalize();
+        let target_position = drawer.target_position.extend(0.0);
+        let direction = (target_position - transform.translation).normalize();
         let adjustment = direction + time.delta_seconds();
-        if drawer
-            .target_position
-            .extend(0.0)
-            .distance(transform.translation)
-            > adjustment.length()
-        {
+        if target_position.distance(transform.translation) > adjustment.length() {
             transform.translation += direction + time.delta_seconds();
         } else {
-            transform.translation = drawer.target_position.extend(0.0);
+            transform.translation = target_position;
         }
     }
 }
