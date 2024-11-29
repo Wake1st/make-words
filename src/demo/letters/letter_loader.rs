@@ -213,7 +213,6 @@ fn load_letters(mut commands: Commands) {
 
 fn spawn_on_input(
     input: Res<ButtonInput<KeyCode>>,
-    asset_server: Res<AssetServer>,
     letter_list: Res<LetterList>,
     cursor_position: Res<CursorPosition>,
     mut spawn_letter: EventWriter<SpawnLetter>,
@@ -352,12 +351,9 @@ fn spawn_on_input(
     }
 
     if spawning {
-        let texture: Handle<Image> =
-            asset_server.load(format!("images/letters/{}", letter.asset_path));
         spawn_letter.send(SpawnLetter {
             letter: letter.clone(),
             position: cursor_position.0,
-            image: texture.clone(),
         });
     }
 }

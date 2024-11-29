@@ -33,15 +33,17 @@ impl Clone for Letter {
 pub struct SpawnLetter {
     pub letter: Letter,
     pub position: Vec2,
-    pub image: Handle<Image>,
 }
 
 fn spawn_letter(
     mut spawn_event: EventReader<SpawnLetter>,
     mut commands: Commands,
     mut create_word_event: EventWriter<CreateNewWord>,
+    asset_server: Res<AssetServer>,
 ) {
     for event in spawn_event.read() {
+        let texture: Handle<Image> =
+            asset_server.load(format!("images/letters/{}", event.letter.asset_path));
         let mut position = Transform::from_scale(Vec2::splat(2.0).extend(0.0));
         position.translation += event.position.extend(0.0);
 
@@ -50,7 +52,7 @@ fn spawn_letter(
                 Name::new("Letter"),
                 event.letter.clone(),
                 SpriteBundle {
-                    texture: event.image.clone(),
+                    texture,
                     transform: position,
                     ..Default::default()
                 },

@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 pub mod letter;
 mod letter_links;
-mod letter_loader;
+pub mod letter_loader;
 pub mod sounds;
 pub mod word;
 
