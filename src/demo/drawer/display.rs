@@ -8,10 +8,10 @@ use crate::{
 
 use super::interaction::{CloseDrawer, OpenDrawer};
 
-const UI_BASE_WIDTH: f32 = 288.;
+const SLIDE_DISTANCE: Vec3 = Vec3::new(0.0, 800.0, 0.0);
 
 pub(super) fn plugin(app: &mut App) {
-    app.add_systems(Startup, setup_drawer.after(load_letters))
+    app.add_systems(OnEnter(Screen::Splash), setup_drawer.after(load_letters))
         .add_systems(
             Update,
             ((show_drawer, hide_drawer), slide_drawer)
@@ -22,7 +22,7 @@ pub(super) fn plugin(app: &mut App) {
 
 #[derive(Component)]
 pub struct LetterDrawer {
-    pub target_position: Vec2,
+    pub target_position: Vec3,
 }
 
 fn setup_drawer(
@@ -37,9 +37,9 @@ fn setup_drawer(
                     // fill the entire window
                     width: Val::Percent(100.),
                     height: Val::Percent(100.),
-                    flex_direction: FlexDirection::Row,
-                    justify_content: JustifyContent::FlexStart,
-                    align_items: AlignItems::FlexStart,
+                    flex_direction: FlexDirection::Column,
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
                     ..Default::default()
                 },
                 ..Default::default()
@@ -51,12 +51,18 @@ fn setup_drawer(
                 .spawn((
                     NodeBundle {
                         style: Style {
-                            flex_direction: FlexDirection::Column,
-                            height: Val::Px(UI_BASE_WIDTH),
-                            width: Val::Percent(100.),
+                            flex_direction: FlexDirection::Row,
+                            justify_content: JustifyContent::Center,
+                            align_items: AlignItems::Center,
+                            flex_wrap: FlexWrap::Wrap,
+                            row_gap: Val::Px(8.),
+                            column_gap: Val::Px(8.),
+                            height: Val::Percent(80.),
+                            width: Val::Percent(88.),
                             ..Default::default()
                         },
-                        ..Default::default()
+                        transform: Transform::from_translation(-SLIDE_DISTANCE),
+                        ..default()
                     },
                     StateScoped(Screen::Gameplay),
                 ))
@@ -69,13 +75,13 @@ fn setup_drawer(
                             letter.clone(),
                             ButtonBundle {
                                 style: Style {
-                                    width: Val::Px(256.),
-                                    height: Val::Px(256.),
+                                    width: Val::Px(128.),
+                                    height: Val::Px(128.),
                                     justify_content: JustifyContent::Center,
                                     align_items: AlignItems::Center,
                                     ..default()
                                 },
-                                transform: Transform::from_scale(Vec2::splat(2.0).extend(0.0)),
+                                transform: Transform::from_scale(Vec2::splat(1.0).extend(0.0)),
                                 image: UiImage {
                                     texture,
                                     ..default()
@@ -95,7 +101,7 @@ fn show_drawer(
 ) {
     for _ in open_drawer.read() {
         if let Ok((mut drawer, transform)) = drawer_query.get_single_mut() {
-            drawer.target_position = transform.translation.xy() + Vec2::new(UI_BASE_WIDTH, 0.0);
+            drawer.target_position = transform.translation + SLIDE_DISTANCE;
         }
     }
 }
@@ -106,14 +112,14 @@ fn hide_drawer(
 ) {
     for _ in close_drawer.read() {
         if let Ok((mut drawer, transform)) = drawer_query.get_single_mut() {
-            drawer.target_position = transform.translation.xy() - Vec2::new(UI_BASE_WIDTH, 0.0);
+            drawer.target_position = transform.translation - SLIDE_DISTANCE;
         }
     }
 }
 
 fn slide_drawer(mut drawer_query: Query<(&mut Transform, &LetterDrawer)>, time: Res<Time>) {
     if let Ok((mut transform, drawer)) = drawer_query.get_single_mut() {
-        let target_position = drawer.target_position.extend(0.0);
+        let target_position = drawer.target_position;
         let direction = (target_position - transform.translation).normalize();
         let adjustment = direction + time.delta_seconds();
         if target_position.distance(transform.translation) > adjustment.length() {
