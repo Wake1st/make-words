@@ -15,7 +15,7 @@ pub(super) fn plugin(app: &mut App) {
         (
             open_drawer
                 .in_set(AppSet::RecordInput)
-                .run_if(input_just_pressed(KeyCode::Tab)),
+                .run_if(input_just_pressed(KeyCode::Space)),
             letter_selected.in_set(AppSet::RecordInput),
         ),
     );

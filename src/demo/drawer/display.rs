@@ -9,6 +9,7 @@ use crate::{
 use super::interaction::{CloseDrawer, OpenDrawer};
 
 const SLIDE_DISTANCE: Vec3 = Vec3::new(0.0, 800.0, 0.0);
+const BACKGROUND_COLOR: Color = Color::linear_rgba(0.0, 0.1, 0.2, 0.8);
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(OnEnter(Screen::Splash), setup_drawer.after(load_letters))
@@ -42,7 +43,7 @@ fn setup_drawer(
                     align_items: AlignItems::Center,
                     ..Default::default()
                 },
-                ..Default::default()
+                ..default()
             },
             StateScoped(Screen::Gameplay),
         ))
@@ -61,8 +62,12 @@ fn setup_drawer(
                             width: Val::Percent(88.),
                             ..Default::default()
                         },
-                        transform: Transform::from_translation(-SLIDE_DISTANCE),
+                        // transform: Transform::from_translation(-SLIDE_DISTANCE),
+                        background_color: BackgroundColor::from(BACKGROUND_COLOR),
                         ..default()
+                    },
+                    LetterDrawer {
+                        target_position: Vec3::ZERO,
                     },
                     StateScoped(Screen::Gameplay),
                 ))
