@@ -113,9 +113,9 @@ fn show_drawer(
 ) {
     for _ in open_drawer.read() {
         if let Ok(mut drawer) = drawer_query.get_single_mut() {
-            drawer.current_position = DRAWER_OPEN;
             drawer.opening = true;
             drawer.moving = true;
+            info!("EVENT -> SHOW DRAWER")
         }
     }
 }
@@ -126,9 +126,9 @@ fn hide_drawer(
 ) {
     for _ in close_drawer.read() {
         if let Ok(mut drawer) = drawer_query.get_single_mut() {
-            drawer.current_position = DRAWER_CLOSED;
             drawer.opening = false;
             drawer.moving = true;
+            info!("EVENT -> HIDE DRAWER")
         }
     }
 }
@@ -145,10 +145,10 @@ fn slide_drawer(mut drawer_query: Query<(&mut Style, &mut LetterDrawer)>, time: 
         if drawer.opening {
             let new_position = drawer.current_position + adjustment;
             info!(
-                "adjustment: {:?}\tnew position: {:?}",
-                adjustment, new_position
+                "opening => current position: {:?}\t{:?} < {:?}",
+                drawer.current_position, new_position, DRAWER_OPEN,
             );
-            if (DRAWER_OPEN - new_position) > adjustment {
+            if new_position < DRAWER_OPEN {
                 style.top = Val::Percent(new_position);
                 drawer.current_position = new_position;
             } else {
@@ -159,10 +159,10 @@ fn slide_drawer(mut drawer_query: Query<(&mut Style, &mut LetterDrawer)>, time: 
         } else {
             let new_position = drawer.current_position - adjustment;
             info!(
-                "adjustment: {:?}\tnew position: {:?}",
-                adjustment, new_position
+                "closing => current position: {:?}\t{:?} > {:?}",
+                drawer.current_position, new_position, DRAWER_CLOSED
             );
-            if (new_position - DRAWER_CLOSED) > adjustment {
+            if new_position > DRAWER_CLOSED {
                 style.top = Val::Percent(new_position);
                 drawer.current_position = new_position;
             } else {
