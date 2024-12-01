@@ -1,16 +1,13 @@
 use bevy::prelude::*;
 
-use crate::{demo::dnd::cursor::CursorPosition, AppSet};
-
-use super::letter::{Letter, SpawnLetter};
+use super::letter::Letter;
 
 pub(super) fn plugin(app: &mut App) {
     app.insert_resource(LetterList {
         letters: Vec::new(),
     });
 
-    app.add_systems(Startup, load_letters)
-        .add_systems(Update, spawn_on_input.in_set(AppSet::Update));
+    app.add_systems(Startup, load_letters);
 }
 
 #[derive(Resource)]
@@ -211,151 +208,4 @@ pub fn load_letters(mut letter_list: ResMut<LetterList>) {
             sound_duration: 0.3,
         },
     ];
-}
-
-fn spawn_on_input(
-    input: Res<ButtonInput<KeyCode>>,
-    letter_list: Res<LetterList>,
-    cursor_position: Res<CursorPosition>,
-    mut spawn_letter: EventWriter<SpawnLetter>,
-) {
-    let mut letter: Letter = letter_list.letters[1].clone();
-    let mut spawning: bool = false;
-
-    if input.just_pressed(KeyCode::KeyA) {
-        letter = letter_list.letters[0].clone();
-        spawning = true;
-    }
-
-    if input.just_pressed(KeyCode::KeyB) {
-        letter = letter_list.letters[1].clone();
-        spawning = true;
-    }
-
-    if input.just_pressed(KeyCode::KeyC) {
-        letter = letter_list.letters[2].clone();
-        spawning = true;
-    }
-
-    if input.just_pressed(KeyCode::KeyD) {
-        letter = letter_list.letters[3].clone();
-        spawning = true;
-    }
-
-    if input.just_pressed(KeyCode::KeyE) {
-        letter = letter_list.letters[4].clone();
-        spawning = true;
-    }
-
-    if input.just_pressed(KeyCode::KeyF) {
-        letter = letter_list.letters[5].clone();
-        spawning = true;
-    }
-
-    if input.just_pressed(KeyCode::KeyG) {
-        letter = letter_list.letters[6].clone();
-        spawning = true;
-    }
-
-    if input.just_pressed(KeyCode::KeyH) {
-        letter = letter_list.letters[7].clone();
-        spawning = true;
-    }
-
-    if input.just_pressed(KeyCode::KeyI) {
-        letter = letter_list.letters[8].clone();
-        spawning = true;
-    }
-
-    if input.just_pressed(KeyCode::KeyJ) {
-        letter = letter_list.letters[9].clone();
-        spawning = true;
-    }
-
-    if input.just_pressed(KeyCode::KeyK) {
-        letter = letter_list.letters[10].clone();
-        spawning = true;
-    }
-
-    if input.just_pressed(KeyCode::KeyL) {
-        letter = letter_list.letters[11].clone();
-        spawning = true;
-    }
-
-    if input.just_pressed(KeyCode::KeyM) {
-        letter = letter_list.letters[12].clone();
-        spawning = true;
-    }
-
-    if input.just_pressed(KeyCode::KeyN) {
-        letter = letter_list.letters[13].clone();
-        spawning = true;
-    }
-
-    if input.just_pressed(KeyCode::KeyO) {
-        letter = letter_list.letters[14].clone();
-        spawning = true;
-    }
-
-    if input.just_pressed(KeyCode::KeyP) {
-        letter = letter_list.letters[15].clone();
-        spawning = true;
-    }
-
-    if input.just_pressed(KeyCode::KeyQ) {
-        letter = letter_list.letters[16].clone();
-        spawning = true;
-    }
-
-    if input.just_pressed(KeyCode::KeyR) {
-        letter = letter_list.letters[17].clone();
-        spawning = true;
-    }
-
-    if input.just_pressed(KeyCode::KeyS) {
-        letter = letter_list.letters[18].clone();
-        spawning = true;
-    }
-
-    if input.just_pressed(KeyCode::KeyT) {
-        letter = letter_list.letters[19].clone();
-        spawning = true;
-    }
-
-    if input.just_pressed(KeyCode::KeyU) {
-        letter = letter_list.letters[20].clone();
-        spawning = true;
-    }
-
-    if input.just_pressed(KeyCode::KeyV) {
-        letter = letter_list.letters[21].clone();
-        spawning = true;
-    }
-
-    if input.just_pressed(KeyCode::KeyW) {
-        letter = letter_list.letters[22].clone();
-        spawning = true;
-    }
-
-    if input.just_pressed(KeyCode::KeyX) {
-        letter = letter_list.letters[23].clone();
-        spawning = true;
-    }
-
-    if input.just_pressed(KeyCode::KeyY) {
-        letter = letter_list.letters[24].clone();
-        spawning = true;
-    }
-
-    if input.just_pressed(KeyCode::KeyZ) {
-        letter = letter_list.letters[25].clone();
-        spawning = true;
-    }
-
-    if spawning {
-        spawn_letter.send(SpawnLetter {
-            letter: letter.clone(),
-            position: cursor_position.0,
-        });
-    }
 }

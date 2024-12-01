@@ -8,11 +8,14 @@ use crate::{
 
 use super::interaction::{CloseDrawer, OpenDrawer};
 
-const SLIDE_DISTANCE: Vec3 = Vec3::new(0.0, 800.0, 0.0);
+const DRAWER_CLOSED: f32 = -100.0;
+const DRAWER_OPEN: f32 = 0.0;
+const DRAW_SLIDE_SPEED: f32 = 120.0;
+
 const BACKGROUND_COLOR: Color = Color::linear_rgba(0.0, 0.1, 0.2, 0.8);
 
 pub(super) fn plugin(app: &mut App) {
-    app.add_systems(OnEnter(Screen::Splash), setup_drawer.after(load_letters))
+    app.add_systems(OnEnter(Screen::Gameplay), setup_drawer.after(load_letters))
         .add_systems(
             Update,
             ((show_drawer, hide_drawer), slide_drawer)
@@ -23,7 +26,9 @@ pub(super) fn plugin(app: &mut App) {
 
 #[derive(Component)]
 pub struct LetterDrawer {
-    pub target_position: Vec3,
+    pub current_position: f32,
+    pub opening: bool,
+    pub moving: bool,
 }
 
 fn setup_drawer(
@@ -35,7 +40,8 @@ fn setup_drawer(
         .spawn((
             NodeBundle {
                 style: Style {
-                    // fill the entire window
+                    position_type: PositionType::Absolute,
+                    top: Val::Percent(DRAWER_CLOSED),
                     width: Val::Percent(100.),
                     height: Val::Percent(100.),
                     flex_direction: FlexDirection::Column,
@@ -44,6 +50,11 @@ fn setup_drawer(
                     ..Default::default()
                 },
                 ..default()
+            },
+            LetterDrawer {
+                current_position: DRAWER_CLOSED,
+                opening: false,
+                moving: false,
             },
             StateScoped(Screen::Gameplay),
         ))
@@ -62,12 +73,8 @@ fn setup_drawer(
                             width: Val::Percent(88.),
                             ..Default::default()
                         },
-                        // transform: Transform::from_translation(-SLIDE_DISTANCE),
                         background_color: BackgroundColor::from(BACKGROUND_COLOR),
                         ..default()
-                    },
-                    LetterDrawer {
-                        target_position: Vec3::ZERO,
                     },
                     StateScoped(Screen::Gameplay),
                 ))
@@ -102,35 +109,67 @@ fn setup_drawer(
 
 fn show_drawer(
     mut open_drawer: EventReader<OpenDrawer>,
-    mut drawer_query: Query<(&mut LetterDrawer, &Transform)>,
+    mut drawer_query: Query<&mut LetterDrawer>,
 ) {
     for _ in open_drawer.read() {
-        if let Ok((mut drawer, transform)) = drawer_query.get_single_mut() {
-            drawer.target_position = transform.translation + SLIDE_DISTANCE;
+        if let Ok(mut drawer) = drawer_query.get_single_mut() {
+            drawer.current_position = DRAWER_OPEN;
+            drawer.opening = true;
+            drawer.moving = true;
         }
     }
 }
 
 fn hide_drawer(
     mut close_drawer: EventReader<CloseDrawer>,
-    mut drawer_query: Query<(&mut LetterDrawer, &Transform)>,
+    mut drawer_query: Query<&mut LetterDrawer>,
 ) {
     for _ in close_drawer.read() {
-        if let Ok((mut drawer, transform)) = drawer_query.get_single_mut() {
-            drawer.target_position = transform.translation - SLIDE_DISTANCE;
+        if let Ok(mut drawer) = drawer_query.get_single_mut() {
+            drawer.current_position = DRAWER_CLOSED;
+            drawer.opening = false;
+            drawer.moving = true;
         }
     }
 }
 
-fn slide_drawer(mut drawer_query: Query<(&mut Transform, &LetterDrawer)>, time: Res<Time>) {
-    if let Ok((mut transform, drawer)) = drawer_query.get_single_mut() {
-        let target_position = drawer.target_position;
-        let direction = (target_position - transform.translation).normalize();
-        let adjustment = direction + time.delta_seconds();
-        if target_position.distance(transform.translation) > adjustment.length() {
-            transform.translation += direction + time.delta_seconds();
+fn slide_drawer(mut drawer_query: Query<(&mut Style, &mut LetterDrawer)>, time: Res<Time>) {
+    if let Ok((mut style, mut drawer)) = drawer_query.get_single_mut() {
+        //  don't process if nothing is happening
+        if !drawer.moving {
+            return;
+        }
+
+        let adjustment = DRAW_SLIDE_SPEED * time.delta_seconds();
+
+        if drawer.opening {
+            let new_position = drawer.current_position + adjustment;
+            info!(
+                "adjustment: {:?}\tnew position: {:?}",
+                adjustment, new_position
+            );
+            if (DRAWER_OPEN - new_position) > adjustment {
+                style.top = Val::Percent(new_position);
+                drawer.current_position = new_position;
+            } else {
+                style.top = Val::Percent(DRAWER_OPEN);
+                drawer.current_position = DRAWER_OPEN;
+                drawer.moving = false;
+            }
         } else {
-            transform.translation = target_position;
+            let new_position = drawer.current_position - adjustment;
+            info!(
+                "adjustment: {:?}\tnew position: {:?}",
+                adjustment, new_position
+            );
+            if (new_position - DRAWER_CLOSED) > adjustment {
+                style.top = Val::Percent(new_position);
+                drawer.current_position = new_position;
+            } else {
+                style.top = Val::Percent(DRAWER_CLOSED);
+                drawer.current_position = DRAWER_CLOSED;
+                drawer.moving = false;
+            }
         }
     }
 }
