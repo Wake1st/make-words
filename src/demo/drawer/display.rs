@@ -124,43 +124,12 @@ fn setup_drawer(
                     style: Style {
                         position_type: PositionType::Absolute,
                         bottom: Val::Percent(-6.0),
-                        // flex_direction: FlexDirection::Row,
-                        // justify_content: JustifyContent::Center,
-                        // align_items: AlignItems::Center,
-                        // height: Val::Percent(80.),
-                        // width: Val::Percent(88.),
                         ..Default::default()
                     },
                     ..default()
                 },
                 StateScoped(Screen::Gameplay),
             ));
-            // .with_children(|builder| {
-            //     for letter in letter_list.letters.iter() {
-            //         let texture: Handle<Image> =
-            //             asset_server.load(format!("images/letters/{}", letter.asset_path));
-
-            //         builder.spawn((
-            //             letter.clone(),
-            //             ButtonBundle {
-            //                 style: Style {
-            //                     width: Val::Px(128.),
-            //                     height: Val::Px(128.),
-            //                     justify_content: JustifyContent::Center,
-            //                     align_items: AlignItems::Center,
-            //                     ..default()
-            //                 },
-            //                 transform: Transform::from_scale(Vec2::splat(1.0).extend(0.0)),
-            //                 image: UiImage {
-            //                     texture,
-            //                     ..default()
-            //                 },
-            //                 ..default()
-            //             },
-            //             StateScoped(Screen::Gameplay),
-            //         ));
-            //     }
-            // });
         });
 }
 
