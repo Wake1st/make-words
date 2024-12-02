@@ -9,7 +9,7 @@ pub(super) fn plugin(app: &mut App) {
     app.add_event::<OpenDrawer>();
     app.add_event::<CloseDrawer>();
 
-    app.insert_resource(DrawerState { opened: true });
+    app.insert_resource(DrawerState { opened: false });
     app.add_systems(
         Update,
         (
@@ -37,15 +37,15 @@ fn open_drawer(
     mut open_drawer: EventWriter<OpenDrawer>,
     mut close_drawer: EventWriter<CloseDrawer>,
 ) {
-    //  set new statef
-    drawer_state.opened = !drawer_state.opened;
-
     //  send the display event
     if drawer_state.opened {
-        open_drawer.send(OpenDrawer {});
-    } else {
         close_drawer.send(CloseDrawer {});
+    } else {
+        open_drawer.send(OpenDrawer {});
     }
+
+    //  set new statef
+    drawer_state.opened = !drawer_state.opened;
 }
 
 fn letter_selected(

@@ -10,9 +10,9 @@ use super::interaction::{CloseDrawer, OpenDrawer};
 
 const DRAWER_CLOSED: f32 = -100.0;
 const DRAWER_OPEN: f32 = 0.0;
-const DRAW_SLIDE_SPEED: f32 = 120.0;
+const DRAW_SLIDE_SPEED: f32 = 620.0;
 
-const BACKGROUND_COLOR: Color = Color::linear_rgba(0.0, 0.1, 0.2, 0.8);
+const BACKGROUND_COLOR: Color = Color::linear_rgba(0.0, 0.1, 0.2, 0.95);
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(OnEnter(Screen::Gameplay), setup_drawer.after(load_letters))
@@ -115,7 +115,6 @@ fn show_drawer(
         if let Ok(mut drawer) = drawer_query.get_single_mut() {
             drawer.opening = true;
             drawer.moving = true;
-            info!("EVENT -> SHOW DRAWER")
         }
     }
 }
@@ -128,7 +127,6 @@ fn hide_drawer(
         if let Ok(mut drawer) = drawer_query.get_single_mut() {
             drawer.opening = false;
             drawer.moving = true;
-            info!("EVENT -> HIDE DRAWER")
         }
     }
 }
@@ -144,10 +142,6 @@ fn slide_drawer(mut drawer_query: Query<(&mut Style, &mut LetterDrawer)>, time: 
 
         if drawer.opening {
             let new_position = drawer.current_position + adjustment;
-            info!(
-                "opening => current position: {:?}\t{:?} < {:?}",
-                drawer.current_position, new_position, DRAWER_OPEN,
-            );
             if new_position < DRAWER_OPEN {
                 style.top = Val::Percent(new_position);
                 drawer.current_position = new_position;
@@ -158,10 +152,6 @@ fn slide_drawer(mut drawer_query: Query<(&mut Style, &mut LetterDrawer)>, time: 
             }
         } else {
             let new_position = drawer.current_position - adjustment;
-            info!(
-                "closing => current position: {:?}\t{:?} > {:?}",
-                drawer.current_position, new_position, DRAWER_CLOSED
-            );
             if new_position > DRAWER_CLOSED {
                 style.top = Val::Percent(new_position);
                 drawer.current_position = new_position;
