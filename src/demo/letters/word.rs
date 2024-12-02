@@ -40,10 +40,12 @@ pub(super) fn plugin(app: &mut App) {
     .add_systems(Update, remove_word.in_set(AppSet::Despawn));
 }
 
-#[derive(Component, Default)]
+#[derive(Component)]
 pub struct Word {
     pub letters: Vec<Entity>,
     pub links: Vec<Entity>,
+    pub drop_zone_left: Entity,
+    pub drop_zone_right: Entity,
 }
 
 #[derive(Event)]
@@ -53,28 +55,59 @@ pub struct CreateNewWord {
     pub position: Vec2,
 }
 
-fn create_new_word(mut create_event: EventReader<CreateNewWord>, mut commands: Commands) {
+fn create_new_word(
+    mut create_event: EventReader<CreateNewWord>,
+    asset_server: Res<AssetServer>,
+    mut commands: Commands,
+) {
     for event in create_event.read() {
+        let texture = asset_server.load("images/blank.png");
+        let transform = Transform::from_translation(event.position.extend(0.0));
+
+        let left_drop_zone = create_drop_zone(&mut commands, texture.clone(), transform);
+        let right_drop_zone = create_drop_zone(&mut commands, texture.clone(), transform);
+
         commands.spawn((
             Name::new("Word"),
             TransformBundle {
-                local: Transform::from_translation(event.position.extend(0.0)),
+                local: transform,
                 ..default()
             },
             Word {
                 letters: event.letters.clone(),
                 links: event.links.clone(),
+                drop_zone_left: left_drop_zone,
+                drop_zone_right: right_drop_zone,
             },
             Draggable {
                 size: Vec2::new(event.letters.len() as f32 * 256.0, 256.0),
+            },
+            ScreenWrap,
+            StateScoped(Screen::Gameplay),
+        ));
+    }
+}
+
+fn create_drop_zone(
+    commands: &mut Commands,
+    texture: Handle<Image>,
+    transform: Transform,
+) -> Entity {
+    commands
+        .spawn((
+            Name::new("DropZone"),
+            SpriteBundle {
+                texture,
+                transform,
+                ..Default::default()
             },
             DropZone {
                 size: Vec2::splat(256.0),
             },
             ScreenWrap,
             StateScoped(Screen::Gameplay),
-        ));
-    }
+        ))
+        .id()
 }
 
 #[derive(Event)]
@@ -213,15 +246,17 @@ fn remove_word(mut remove_letter_event: EventReader<RemoveWord>, mut commands: C
 }
 
 fn move_word_components(
-    words: Query<(&Transform, &Word), (Without<Letter>, Without<LetterLink>)>,
+    words: Query<(&Transform, &Word), (Without<Letter>, Without<LetterLink>, Without<DropZone>)>,
     mut moving_set: ParamSet<(
         Query<&mut Transform, With<Letter>>,
         Query<&mut Transform, With<LetterLink>>,
+        Query<&mut Transform, With<DropZone>>,
     )>,
 ) {
     for (word_transform, word) in words.iter() {
         let word_half_length = word.letters.len() as f32 * 128.0;
 
+        //  move letters
         for (index, &letter) in word.letters.iter().enumerate() {
             if let Ok(mut letter_transform) = moving_set.p0().get_mut(letter) {
                 let x =
@@ -230,12 +265,23 @@ fn move_word_components(
             }
         }
 
+        //  move links
         for (index, &link) in word.links.iter().enumerate() {
             if let Ok(mut link_transform) = moving_set.p1().get_mut(link) {
                 let x =
                     word_transform.translation.x - word_half_length + 256.0 * (1.0 + index as f32);
                 link_transform.translation = Vec3::new(x, word_transform.translation.y, 0.0);
             }
+        }
+
+        //  move drop zones
+        if let Ok(mut link_transform) = moving_set.p2().get_mut(word.drop_zone_left) {
+            let x = word_transform.translation.x - word_half_length - 128.0;
+            link_transform.translation = Vec3::new(x, word_transform.translation.y, 0.0);
+        }
+        if let Ok(mut link_transform) = moving_set.p2().get_mut(word.drop_zone_right) {
+            let x = word_transform.translation.x + word_half_length + 128.0;
+            link_transform.translation = Vec3::new(x, word_transform.translation.y, 0.0);
         }
     }
 }
