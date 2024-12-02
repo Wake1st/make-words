@@ -43,9 +43,15 @@ pub fn load_letters(mut letter_list: ResMut<LetterList>) {
             sound_duration: 0.3,
         },
         Letter {
-            value: "e".into(),
+            value: "E".into(),
             asset_path: "e.png".into(),
             sound_path: "e.ogg".into(),
+            sound_duration: 0.3,
+        },
+        Letter {
+            value: "e".into(),
+            asset_path: "eh.png".into(),
+            sound_path: "eh.ogg".into(),
             sound_duration: 0.3,
         },
         Letter {
@@ -174,6 +180,12 @@ pub fn load_letters(mut letter_list: ResMut<LetterList>) {
             sound_path: "z.ogg".into(),
             sound_duration: 0.3,
         },
+        Letter {
+            value: "sh".into(),
+            asset_path: "sh.png".into(),
+            sound_path: "sh.ogg".into(),
+            sound_duration: 0.3,
+        },
         //	nahuatl
         Letter {
             value: "tl".into(),
@@ -200,12 +212,5 @@ pub fn load_letters(mut letter_list: ResMut<LetterList>) {
         //     sound_path: "ö.ogg".into(),
         //     sound_duration: 0.3,
         // },
-        //  other
-        Letter {
-            value: "sh".into(),
-            asset_path: "sh.png".into(),
-            sound_path: "sh.ogg".into(),
-            sound_duration: 0.3,
-        },
     ];
 }
