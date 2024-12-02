@@ -1,4 +1,4 @@
-use bevy::{color::palettes::css::WHITE, prelude::*};
+use bevy::prelude::*;
 
 use crate::{
     demo::{
@@ -32,7 +32,7 @@ pub(super) fn plugin(app: &mut App) {
             add_letters_to_word,
             remove_letters_from_word,
             shift_word,
-            (move_word_components, draw_drop_zones),
+            move_word_components,
         )
             .chain()
             .in_set(AppSet::Update),
@@ -62,11 +62,13 @@ fn create_new_word(
 ) {
     for event in create_event.read() {
         let texture = asset_server.load("images/blank.png");
-        let transform = Transform::from_translation(event.position.extend(0.0));
+        let mut transform = Transform::from_translation(event.position.extend(0.0));
+        transform.scale *= 2.0;
 
         let left_drop_zone = create_drop_zone(&mut commands, texture.clone(), transform);
         let right_drop_zone = create_drop_zone(&mut commands, texture.clone(), transform);
 
+        transform.scale *= 0.5;
         commands.spawn((
             Name::new("Word"),
             TransformBundle {
@@ -101,9 +103,7 @@ fn create_drop_zone(
                 transform,
                 ..Default::default()
             },
-            DropZone {
-                size: Vec2::splat(256.0),
-            },
+            DropZone {},
             ScreenWrap,
             StateScoped(Screen::Gameplay),
         ))
@@ -239,8 +239,19 @@ pub struct RemoveWord {
     pub word: Entity,
 }
 
-fn remove_word(mut remove_letter_event: EventReader<RemoveWord>, mut commands: Commands) {
+fn remove_word(
+    mut remove_letter_event: EventReader<RemoveWord>,
+    words: Query<&Word>,
+    mut commands: Commands,
+) {
     for event in remove_letter_event.read() {
+        //  despawn the drop zones
+        if let Ok(word) = words.get(event.word) {
+            commands.entity(word.drop_zone_left).despawn_recursive();
+            commands.entity(word.drop_zone_right).despawn_recursive();
+        }
+
+        //  despawn the word
         commands.entity(event.word).despawn_recursive();
     }
 }
@@ -283,19 +294,6 @@ fn move_word_components(
             let x = word_transform.translation.x + word_half_length + 128.0;
             link_transform.translation = Vec3::new(x, word_transform.translation.y, 0.0);
         }
-    }
-}
-
-fn draw_drop_zones(words: Query<(&Transform, &Word)>, mut gizmos: Gizmos) {
-    for (transform, word) in words.iter() {
-        let zone_adjustment = Vec2::new((word.letters.len() + 1) as f32 * 128.0, 0.0);
-
-        //	remove if mouse is in the left drop zone
-        let left_translation = transform.translation.xy() - zone_adjustment;
-        gizmos.rect_2d(left_translation, 0., Vec2::splat(256.), WHITE);
-
-        let right_translation = transform.translation.xy() + zone_adjustment;
-        gizmos.rect_2d(right_translation, 0., Vec2::splat(256.), WHITE);
     }
 }
 

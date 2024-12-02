@@ -18,5 +18,6 @@ This game was made using the [bevy new 2d template](https://github.com/TheBevyFl
   - [x] audio sources
 - [x] games has `letter-drawer` to pull from
 - [ ] final updates/edits
+  - [x] use the "blank" template for drop zones (not gizmos)
   - [ ] UI cleanup/styling
-  - [ ] use the "blank" template for drop zones (not gizmos)
+  - [ ] add pitch variance

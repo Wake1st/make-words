@@ -7,6 +7,8 @@ use crate::{
 
 use super::{cursor::store_cursor_position, drag::Dragging};
 
+pub const DROP_ZONE_SIZE: Vec2 = Vec2::splat(256.0);
+
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(
         Update,
@@ -16,15 +18,13 @@ pub(super) fn plugin(app: &mut App) {
 }
 
 #[derive(Component, Debug)]
-pub struct DropZone {
-    pub size: Vec2,
-}
+pub struct DropZone {}
 
 fn drop(
     buttons: Res<ButtonInput<MouseButton>>,
     dragging: Query<(Entity, &Transform, &Word), With<Dragging>>,
     mut commands: Commands,
-    drop_zones: Query<(Entity, &Transform, &DropZone, &Word)>,
+    drop_zones: Query<(Entity, &Transform, &Word)>,
     mut add_letter_event: EventWriter<AddLettersToWord>,
     mut remove_word_event: EventWriter<RemoveWord>,
 ) {
@@ -36,9 +36,7 @@ fn drop(
             commands.entity(dragging_entity).remove::<Dragging>();
 
             //	check for drop zone
-            for (drop_zone_entity, drop_zone_transform, drop_zone, drop_zone_word) in
-                drop_zones.iter()
-            {
+            for (drop_zone_entity, drop_zone_transform, drop_zone_word) in drop_zones.iter() {
                 //  calculate adjustments for both words
                 let drop_zone_adjustment = (drop_zone_word.letters.len() + 1) as f32 * 128.0;
                 let dragging_adjustment = (dragging_word.letters.len() - 1) as f32 * 128.0;
@@ -48,7 +46,7 @@ fn drop(
                     drop_zone_transform.translation.xy() - Vec2::new(drop_zone_adjustment, 0.0);
                 let dragging_right_origin =
                     dragging_transform.translation.xy() + Vec2::new(dragging_adjustment, 0.0);
-                let drop_zone_left = Rect::from_center_size(drop_zone_left_origin, drop_zone.size);
+                let drop_zone_left = Rect::from_center_size(drop_zone_left_origin, DROP_ZONE_SIZE);
 
                 if drop_zone_left.contains(dragging_right_origin) {
                     //  attach to dropped letter
@@ -70,7 +68,7 @@ fn drop(
                 let dragging_left_origin =
                     dragging_transform.translation.xy() - Vec2::new(dragging_adjustment, 0.0);
                 let drop_zone_right =
-                    Rect::from_center_size(drop_zone_right_origin, drop_zone.size);
+                    Rect::from_center_size(drop_zone_right_origin, DROP_ZONE_SIZE);
 
                 if drop_zone_right.contains(dragging_left_origin) {
                     //  attach to dropped letter
