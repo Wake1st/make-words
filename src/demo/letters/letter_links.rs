@@ -87,7 +87,6 @@ pub struct RemoveLetterLink {
 
 fn despawn_link(mut remove_event: EventReader<RemoveLetterLink>, mut commands: Commands) {
     for event in remove_event.read() {
-        info!("removing {:?}", event.link);
         commands.entity(event.link).despawn_recursive();
     }
 }
