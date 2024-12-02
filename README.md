@@ -16,4 +16,5 @@ This game was made using the [bevy new 2d template](https://github.com/TheBevyFl
 - [x] add characters from other languages (go crazy) (tongue clicks)
   - [x] 2D sprite textures
   - [x] audio sources
-- [ ] games has `bucket-O-letters` to pull from
+- [x] games has `letter-drawer` to pull from
+- [ ] final updates/edits
