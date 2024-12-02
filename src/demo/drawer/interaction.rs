@@ -56,14 +56,11 @@ fn letter_selected(
     mut spawn_letter: EventWriter<SpawnLetter>,
 ) {
     for (interaction, transform, letter) in &mut interaction_query {
-        match *interaction {
-            Interaction::Pressed => {
-                spawn_letter.send(SpawnLetter {
-                    letter: letter.clone(),
-                    position: transform.translation.xy(),
-                });
-            }
-            _ => (),
+        if *interaction == Interaction::Pressed {
+            spawn_letter.send(SpawnLetter {
+                letter: letter.clone(),
+                position: transform.translation.xy(),
+            });
         }
     }
 }
