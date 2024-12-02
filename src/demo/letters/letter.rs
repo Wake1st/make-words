@@ -44,8 +44,8 @@ fn spawn_letter(
     for event in spawn_event.read() {
         let texture: Handle<Image> =
             asset_server.load(format!("images/letters/{}", event.letter.asset_path));
-        let mut position = Transform::from_scale(Vec2::splat(2.0).extend(0.0));
-        position.translation += event.position.extend(0.0);
+        let mut transform = Transform::from_scale(Vec2::splat(2.0).extend(0.0));
+        transform.translation += event.position.extend(0.0);
 
         let letter_entity = commands
             .spawn((
@@ -53,7 +53,7 @@ fn spawn_letter(
                 event.letter.clone(),
                 SpriteBundle {
                     texture,
-                    transform: position,
+                    transform,
                     ..Default::default()
                 },
                 StateScoped(Screen::Gameplay),
