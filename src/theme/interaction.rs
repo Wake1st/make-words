@@ -84,16 +84,14 @@ fn trigger_interaction_sound_effect(
     mut commands: Commands,
 ) {
     for interaction in &interaction_query {
-        let source = match interaction {
-            Interaction::Pressed => interaction_assets.press.clone(),
-            _ => continue,
-        };
-        commands.spawn((
-            AudioBundle {
-                source,
-                settings: PlaybackSettings::DESPAWN,
-            },
-            SoundEffect,
-        ));
+        if *interaction == Interaction::Pressed {
+            commands.spawn((
+                AudioBundle {
+                    source: interaction_assets.press.clone(),
+                    settings: PlaybackSettings::DESPAWN,
+                },
+                SoundEffect,
+            ));
+        }
     }
 }
