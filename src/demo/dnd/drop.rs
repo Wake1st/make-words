@@ -56,10 +56,14 @@ fn drop(
                         links: dragging_word.links.clone(),
                         left_side: true,
                     });
+
                     //  remove old word
                     remove_word_event.send(RemoveWord {
                         word: dragging_entity,
                     });
+
+                    //  exit to ensure this process happens ONCE
+                    return;
                 }
 
                 //	check if dragging is in the right drop zone
@@ -78,10 +82,14 @@ fn drop(
                         links: dragging_word.links.clone(),
                         left_side: false,
                     });
+
                     //  remove old word
                     remove_word_event.send(RemoveWord {
                         word: dragging_entity,
                     });
+
+                    //  exit to ensure this process happens ONCE
+                    return;
                 }
             }
         }
