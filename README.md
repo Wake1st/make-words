@@ -21,4 +21,5 @@ This game was made using the [bevy new 2d template](https://github.com/TheBevyFl
   - [x] use the "blank" template for drop zones (not gizmos)
   - [x] add pitch variance
   - [x] UI cleanup/styling
-  - [ ] user should be able to "remove" letters from the "play area"
+  - [x] user should be able to "remove" letters from the "play area"
+  - [ ] add incrementing instructions for new users to learn

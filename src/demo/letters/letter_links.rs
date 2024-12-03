@@ -1,10 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
-    demo::{
-        dnd::{cursor::CursorPosition, drag::Draggable},
-        movement::ScreenWrap,
-    },
+    demo::dnd::{cursor::CursorPosition, drag::Draggable},
     screens::Screen,
     AppSet,
 };
@@ -12,6 +9,7 @@ use crate::{
 use super::word::{RemoveLettersFromWord, Word};
 
 const LINK_SIZE: Vec2 = Vec2::new(32.0, 256.0);
+pub const LETTER_LINK_LAYER: f32 = 0.1;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_event::<RemoveLetterLink>();
@@ -42,7 +40,6 @@ pub fn spawn_letter_link(spawn: SpawnLink, commands: &mut Commands) -> Entity {
                 ..default()
             },
             LetterLink { size: LINK_SIZE },
-            ScreenWrap,
             StateScoped(Screen::Gameplay),
         ))
         .id()

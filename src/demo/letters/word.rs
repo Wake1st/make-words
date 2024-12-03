@@ -4,19 +4,19 @@ use crate::{
     demo::{
         dnd::{drag::Draggable, drop::DropZone},
         letters::letter_links::{spawn_letter_link, SpawnLink},
-        movement::ScreenWrap,
     },
     screens::Screen,
     AppSet,
 };
 
 use super::{
-    letter::Letter,
-    letter_links::{LetterLink, RemoveLetterLink},
+    letter::{Letter, RemoveLetters},
+    letter_links::{LetterLink, RemoveLetterLink, LETTER_LINK_LAYER},
     sounds::PlayWordSounds,
 };
 
 const SHIFT_DISTANCE: f32 = 100.0;
+const DROP_ZONE_LAYER: f32 = -0.1;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_event::<CreateNewWord>();
@@ -63,12 +63,14 @@ fn create_new_word(
     for event in create_event.read() {
         let texture = asset_server.load("images/blank.png");
         let mut transform = Transform::from_translation(event.position.extend(0.0));
+        transform.translation.z += DROP_ZONE_LAYER;
         transform.scale *= 2.0;
 
         let left_drop_zone = create_drop_zone(&mut commands, texture.clone(), transform);
         let right_drop_zone = create_drop_zone(&mut commands, texture.clone(), transform);
 
         transform.scale *= 0.5;
+        transform.translation.z -= DROP_ZONE_LAYER;
         commands.spawn((
             Name::new("Word"),
             TransformBundle {
@@ -84,7 +86,6 @@ fn create_new_word(
             Draggable {
                 size: Vec2::new(event.letters.len() as f32 * 256.0, 256.0),
             },
-            ScreenWrap,
             StateScoped(Screen::Gameplay),
         ));
     }
@@ -104,7 +105,6 @@ fn create_drop_zone(
                 ..Default::default()
             },
             DropZone {},
-            ScreenWrap,
             StateScoped(Screen::Gameplay),
         ))
         .id()
@@ -237,18 +237,33 @@ fn remove_letters_from_word(
 #[derive(Event)]
 pub struct RemoveWord {
     pub word: Entity,
+    pub remove_parts: bool,
 }
 
 fn remove_word(
     mut remove_letter_event: EventReader<RemoveWord>,
     words: Query<&Word>,
     mut commands: Commands,
+    mut remove_letters: EventWriter<RemoveLetters>,
+    mut remove_link: EventWriter<RemoveLetterLink>,
 ) {
     for event in remove_letter_event.read() {
-        //  despawn the drop zones
         if let Ok(word) = words.get(event.word) {
+            //  despawn the drop zones
             commands.entity(word.drop_zone_left).despawn_recursive();
             commands.entity(word.drop_zone_right).despawn_recursive();
+
+            if event.remove_parts {
+                //  despawn the letters
+                remove_letters.send(RemoveLetters {
+                    letters: word.letters.clone(),
+                });
+
+                //  despawn the links
+                for &link in word.links.iter() {
+                    remove_link.send(RemoveLetterLink { link });
+                }
+            }
         }
 
         //  despawn the word
@@ -281,18 +296,21 @@ fn move_word_components(
             if let Ok(mut link_transform) = moving_set.p1().get_mut(link) {
                 let x =
                     word_transform.translation.x - word_half_length + 256.0 * (1.0 + index as f32);
-                link_transform.translation = Vec3::new(x, word_transform.translation.y, 0.0);
+                link_transform.translation =
+                    Vec3::new(x, word_transform.translation.y, LETTER_LINK_LAYER);
             }
         }
 
         //  move drop zones
         if let Ok(mut link_transform) = moving_set.p2().get_mut(word.drop_zone_left) {
             let x = word_transform.translation.x - word_half_length - 128.0;
-            link_transform.translation = Vec3::new(x, word_transform.translation.y, 0.0);
+            link_transform.translation =
+                Vec3::new(x, word_transform.translation.y, DROP_ZONE_LAYER);
         }
         if let Ok(mut link_transform) = moving_set.p2().get_mut(word.drop_zone_right) {
             let x = word_transform.translation.x + word_half_length + 128.0;
-            link_transform.translation = Vec3::new(x, word_transform.translation.y, 0.0);
+            link_transform.translation =
+                Vec3::new(x, word_transform.translation.y, DROP_ZONE_LAYER);
         }
     }
 }

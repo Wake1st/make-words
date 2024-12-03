@@ -1,13 +1,17 @@
 use bevy::prelude::*;
 
-use crate::screens::Screen;
+use crate::{screens::Screen, AppSet};
 
 use super::word::CreateNewWord;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_event::<SpawnLetter>();
+    app.add_event::<RemoveLetters>();
 
-    app.add_systems(Update, (spawn_letter,).chain());
+    app.add_systems(
+        Update,
+        (spawn_letter, remove_letters).in_set(AppSet::Update),
+    );
 }
 
 #[derive(Component, Default)]
@@ -65,5 +69,18 @@ fn spawn_letter(
             links: Vec::new(),
             position: event.position,
         });
+    }
+}
+
+#[derive(Event)]
+pub struct RemoveLetters {
+    pub letters: Vec<Entity>,
+}
+
+fn remove_letters(mut remove_event: EventReader<RemoveLetters>, mut commands: Commands) {
+    for event in remove_event.read() {
+        for &letter in event.letters.iter() {
+            commands.entity(letter).despawn_recursive();
+        }
     }
 }

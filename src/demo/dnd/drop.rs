@@ -1,7 +1,10 @@
 use bevy::prelude::*;
 
 use crate::{
-    demo::letters::word::{AddLettersToWord, RemoveWord, Word},
+    demo::letters::{
+        trash::TrashCanDimentions,
+        word::{AddLettersToWord, RemoveWord, Word},
+    },
     AppSet,
 };
 
@@ -27,6 +30,7 @@ fn drop(
     drop_zones: Query<(Entity, &Transform, &Word)>,
     mut add_letter_event: EventWriter<AddLettersToWord>,
     mut remove_word_event: EventWriter<RemoveWord>,
+    trash_can: Res<TrashCanDimentions>,
 ) {
     //  Only end on mouse up
     if buttons.just_released(MouseButton::Left) {
@@ -40,12 +44,12 @@ fn drop(
                 //  calculate adjustments for both words
                 let drop_zone_adjustment = (drop_zone_word.letters.len() + 1) as f32 * 128.0;
                 let dragging_adjustment = (dragging_word.letters.len() - 1) as f32 * 128.0;
+                let dragging_xy = dragging_transform.translation.xy();
 
                 //	check if dragging is in the left drop zone
                 let drop_zone_left_origin =
                     drop_zone_transform.translation.xy() - Vec2::new(drop_zone_adjustment, 0.0);
-                let dragging_right_origin =
-                    dragging_transform.translation.xy() + Vec2::new(dragging_adjustment, 0.0);
+                let dragging_right_origin = dragging_xy + Vec2::new(dragging_adjustment, 0.0);
                 let drop_zone_left = Rect::from_center_size(drop_zone_left_origin, DROP_ZONE_SIZE);
 
                 if drop_zone_left.contains(dragging_right_origin) {
@@ -60,6 +64,7 @@ fn drop(
                     //  remove old word
                     remove_word_event.send(RemoveWord {
                         word: dragging_entity,
+                        remove_parts: false,
                     });
 
                     //  exit to ensure this process happens ONCE
@@ -69,8 +74,7 @@ fn drop(
                 //	check if dragging is in the right drop zone
                 let drop_zone_right_origin =
                     drop_zone_transform.translation.xy() + Vec2::new(drop_zone_adjustment, 0.0);
-                let dragging_left_origin =
-                    dragging_transform.translation.xy() - Vec2::new(dragging_adjustment, 0.0);
+                let dragging_left_origin = dragging_xy - Vec2::new(dragging_adjustment, 0.0);
                 let drop_zone_right =
                     Rect::from_center_size(drop_zone_right_origin, DROP_ZONE_SIZE);
 
@@ -86,10 +90,22 @@ fn drop(
                     //  remove old word
                     remove_word_event.send(RemoveWord {
                         word: dragging_entity,
+                        remove_parts: false,
                     });
 
                     //  exit to ensure this process happens ONCE
                     return;
+                }
+
+                //  finally, check for trash dump
+                let dragging_word_size =
+                    Vec2::new(dragging_word.letters.len() as f32 * 256.0, 256.0);
+                let dragging_rect = Rect::from_center_size(dragging_xy, dragging_word_size);
+                if dragging_rect.contains(trash_can.rect.center()) {
+                    remove_word_event.send(RemoveWord {
+                        word: dragging_entity,
+                        remove_parts: true,
+                    });
                 }
             }
         }
