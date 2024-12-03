@@ -121,7 +121,6 @@ fn setup_drawer(
                 Val::Percent(-10.0),
                 Instruction { index: 0 },
             );
-            
             spawn_instruction(
                 builder,
                 "Move letters around by selecting them with the right mouse button and dragging them around.".into(),
@@ -146,7 +145,6 @@ fn setup_drawer(
                 Val::Percent(-90.0),
                 Instruction { index: 4 },
             );
-
         });
 }
 
