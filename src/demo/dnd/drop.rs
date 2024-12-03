@@ -1,9 +1,12 @@
 use bevy::prelude::*;
 
 use crate::{
-    demo::letters::{
-        trash::TrashCanDimentions,
-        word::{AddLettersToWord, RemoveWord, Word},
+    demo::{
+        drawer::instructions::IterateInstruction,
+        letters::{
+            trash::TrashCanDimentions,
+            word::{AddLettersToWord, RemoveWord, Word},
+        },
     },
     AppSet,
 };
@@ -31,6 +34,7 @@ fn drop(
     mut add_letter_event: EventWriter<AddLettersToWord>,
     mut remove_word_event: EventWriter<RemoveWord>,
     trash_can: Res<TrashCanDimentions>,
+    mut iterate_instruction: EventWriter<IterateInstruction>,
 ) {
     //  Only end on mouse up
     if buttons.just_released(MouseButton::Left) {
@@ -67,6 +71,9 @@ fn drop(
                         remove_parts: false,
                     });
 
+                    //  update instructions
+                    iterate_instruction.send(IterateInstruction { index: 2 });
+
                     //  exit to ensure this process happens ONCE
                     return;
                 }
@@ -93,6 +100,9 @@ fn drop(
                         remove_parts: false,
                     });
 
+                    //  update instructions
+                    iterate_instruction.send(IterateInstruction { index: 2 });
+
                     //  exit to ensure this process happens ONCE
                     return;
                 }
@@ -102,10 +112,14 @@ fn drop(
                     Vec2::new(dragging_word.letters.len() as f32 * 256.0, 256.0);
                 let dragging_rect = Rect::from_center_size(dragging_xy, dragging_word_size);
                 if dragging_rect.contains(trash_can.rect.center()) {
+                    //  remove the complete word
                     remove_word_event.send(RemoveWord {
                         word: dragging_entity,
                         remove_parts: true,
                     });
+
+                    //  update instructions
+                    iterate_instruction.send(IterateInstruction { index: 4 });
                 }
             }
         }

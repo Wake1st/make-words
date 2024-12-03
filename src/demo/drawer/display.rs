@@ -1,4 +1,4 @@
-use bevy::{color::palettes::css::BLACK, prelude::*};
+use bevy::prelude::*;
 
 use crate::{
     demo::letters::letter_loader::{load_letters, LetterList},
@@ -7,7 +7,10 @@ use crate::{
     AppSet,
 };
 
-use super::interaction::{CloseDrawer, OpenDrawer};
+use super::{
+    instructions::{spawn_instruction, Instruction},
+    interaction::{CloseDrawer, OpenDrawer},
+};
 
 const DRAWER_CLOSED: f32 = -100.0;
 const DRAWER_OPEN: f32 = 0.0;
@@ -111,30 +114,39 @@ fn setup_drawer(
                     }
                 });
 
-            //  helper text
-            builder.spawn((
-                TextBundle {
-                    text: Text {
-                        sections: vec![TextSection {
-                            value: "Select 'SPACE' to open the letter drawer.".into(),
-                            style: TextStyle {
-                                color: BLACK.into(),
-                                font_size: 32.0,
-                                ..default()
-                            },
-                        }],
-                        justify: JustifyText::Center,
-                        ..default()
-                    },
-                    style: Style {
-                        position_type: PositionType::Absolute,
-                        bottom: Val::Percent(-6.0),
-                        ..Default::default()
-                    },
-                    ..default()
-                },
-                StateScoped(Screen::Gameplay),
-            ));
+            //  spawn instructions
+            spawn_instruction(
+                builder,
+                "Select 'SPACE' to open the letter drawer; 'add' letters with the right mouse button.".into(),
+                Val::Percent(-10.0),
+                Instruction { index: 0 },
+            );
+            
+            spawn_instruction(
+                builder,
+                "Move letters around by selecting them with the right mouse button and dragging them around.".into(),
+                Val::Percent(-30.0),
+                Instruction { index: 1 },
+            );
+            spawn_instruction(
+                builder,
+                "'Combine' letters/words by moving them together.".into(),
+                Val::Percent(-50.0),
+                Instruction { index: 2 },
+            );
+            spawn_instruction(
+                builder,
+                "'Disconnect' words by right clicking the red colored links between the letters.".into(),
+                Val::Percent(-70.0),
+                Instruction { index: 3 },
+            );
+            spawn_instruction(
+                builder,
+                "'Remove' words by dragging them over the trash can icon.".into(),
+                Val::Percent(-90.0),
+                Instruction { index: 4 },
+            );
+
         });
 }
 

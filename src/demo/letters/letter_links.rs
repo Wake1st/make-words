@@ -1,7 +1,10 @@
 use bevy::prelude::*;
 
 use crate::{
-    demo::dnd::{cursor::CursorPosition, drag::Draggable},
+    demo::{
+        dnd::{cursor::CursorPosition, drag::Draggable},
+        drawer::instructions::IterateInstruction,
+    },
     screens::Screen,
     AppSet,
 };
@@ -51,6 +54,7 @@ fn break_word(
     links: Query<(&Transform, &LetterLink)>,
     cursor_position: Res<CursorPosition>,
     mut remove_letters_event: EventWriter<RemoveLettersFromWord>,
+    mut iterate_instruction: EventWriter<IterateInstruction>,
 ) {
     if buttons.just_pressed(MouseButton::Right) {
         //	check if cursor is hovered over a word
@@ -69,6 +73,9 @@ fn break_word(
                                 link_index: index,
                                 position: link_transform.translation.xy(),
                             });
+
+                            //  update instructions
+                            iterate_instruction.send(IterateInstruction { index: 3 });
                         }
                     }
                 }
