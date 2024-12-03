@@ -14,7 +14,7 @@ use super::{
 
 const DRAWER_CLOSED: f32 = -100.0;
 const DRAWER_OPEN: f32 = 0.0;
-const DRAW_SLIDE_SPEED: f32 = 620.0;
+const DRAW_SLIDE_SPEED: f32 = 420.0;
 
 const DRAWER_PADDING: f32 = 24.0;
 
