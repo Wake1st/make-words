@@ -1,18 +1,22 @@
-use bevy::{color::palettes::css::BLACK, prelude::*};
+use bevy::prelude::*;
 
 use crate::{
     demo::letters::letter_loader::{load_letters, LetterList},
     screens::Screen,
+    theme::palette::{DRAWER_BACKGROUND_COLOR, DRAWER_BORDER_COLOR},
     AppSet,
 };
 
-use super::interaction::{CloseDrawer, OpenDrawer};
+use super::{
+    instructions::{spawn_instruction, Instruction},
+    interaction::{CloseDrawer, OpenDrawer},
+};
 
 const DRAWER_CLOSED: f32 = -100.0;
 const DRAWER_OPEN: f32 = 0.0;
 const DRAW_SLIDE_SPEED: f32 = 620.0;
 
-const BACKGROUND_COLOR: Color = Color::linear_rgba(0.0, 0.1, 0.2, 0.95);
+const DRAWER_PADDING: f32 = 24.0;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(OnEnter(Screen::Gameplay), setup_drawer.after(load_letters))
@@ -70,11 +74,15 @@ fn setup_drawer(
                             flex_wrap: FlexWrap::Wrap,
                             row_gap: Val::Px(8.),
                             column_gap: Val::Px(8.),
-                            height: Val::Percent(80.),
-                            width: Val::Percent(88.),
+                            height: Val::Auto,
+                            width: Val::Percent(60.),
+                            padding: UiRect::all(Val::Px(DRAWER_PADDING)),
+                            border: UiRect::all(Val::Px(16.0)),
                             ..Default::default()
                         },
-                        background_color: BackgroundColor::from(BACKGROUND_COLOR),
+                        border_radius: BorderRadius::all(Val::Px(16.0)),
+                        background_color: BackgroundColor::from(DRAWER_BACKGROUND_COLOR),
+                        border_color: BorderColor::from(DRAWER_BORDER_COLOR),
                         ..default()
                     },
                     StateScoped(Screen::Gameplay),
@@ -106,30 +114,37 @@ fn setup_drawer(
                     }
                 });
 
-            //  helper text
-            builder.spawn((
-                TextBundle {
-                    text: Text {
-                        sections: vec![TextSection {
-                            value: "Select 'SPACE' to open the letter drawer.".into(),
-                            style: TextStyle {
-                                color: BLACK.into(),
-                                font_size: 32.0,
-                                ..default()
-                            },
-                        }],
-                        justify: JustifyText::Center,
-                        ..default()
-                    },
-                    style: Style {
-                        position_type: PositionType::Absolute,
-                        bottom: Val::Percent(-6.0),
-                        ..Default::default()
-                    },
-                    ..default()
-                },
-                StateScoped(Screen::Gameplay),
-            ));
+            //  spawn instructions
+            spawn_instruction(
+                builder,
+                "Select 'SPACE' to open the letter drawer; 'add' letters with the right mouse button.".into(),
+                Val::Percent(-10.0),
+                Instruction { index: 0 },
+            );
+            spawn_instruction(
+                builder,
+                "Move letters around by selecting them with the right mouse button and dragging them around.".into(),
+                Val::Percent(-30.0),
+                Instruction { index: 1 },
+            );
+            spawn_instruction(
+                builder,
+                "'Combine' letters/words by moving them together.".into(),
+                Val::Percent(-50.0),
+                Instruction { index: 2 },
+            );
+            spawn_instruction(
+                builder,
+                "'Disconnect' words by right clicking the red colored links between the letters.".into(),
+                Val::Percent(-70.0),
+                Instruction { index: 3 },
+            );
+            spawn_instruction(
+                builder,
+                "'Remove' words by dragging them over the trash can icon.".into(),
+                Val::Percent(-90.0),
+                Instruction { index: 4 },
+            );
         });
 }
 

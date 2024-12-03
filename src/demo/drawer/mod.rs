@@ -1,9 +1,9 @@
 use bevy::prelude::*;
 
 mod display;
+pub mod instructions;
 mod interaction;
-mod window_size;
 
 pub(super) fn plugin(app: &mut App) {
-    app.add_plugins((window_size::plugin, interaction::plugin, display::plugin));
+    app.add_plugins((interaction::plugin, display::plugin, instructions::plugin));
 }

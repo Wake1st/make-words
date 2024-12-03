@@ -5,6 +5,8 @@ use crate::{
     AppSet,
 };
 
+use super::instructions::IterateInstruction;
+
 pub(super) fn plugin(app: &mut App) {
     app.add_event::<OpenDrawer>();
     app.add_event::<CloseDrawer>();
@@ -54,13 +56,18 @@ fn letter_selected(
         (Changed<Interaction>, With<Letter>),
     >,
     mut spawn_letter: EventWriter<SpawnLetter>,
+    mut iterate_instruction: EventWriter<IterateInstruction>,
 ) {
     for (interaction, transform, letter) in &mut interaction_query {
         if *interaction == Interaction::Pressed {
+            //  spawn selected letter
             spawn_letter.send(SpawnLetter {
                 letter: letter.clone(),
                 position: transform.translation.xy(),
             });
+
+            //  update instructions
+            iterate_instruction.send(IterateInstruction { index: 0 });
         }
     }
 }

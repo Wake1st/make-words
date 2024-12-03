@@ -30,7 +30,11 @@ fn play_break_sound(
         commands.spawn((
             AudioBundle {
                 source,
-                settings: PlaybackSettings::DESPAWN,
+                settings: PlaybackSettings {
+                    mode: PlaybackMode::Despawn,
+                    speed: rand::random::<f32>() * 0.1 + 0.9,
+                    ..default()
+                },
             },
             SoundEffect,
         ));
@@ -97,6 +101,7 @@ fn play_delayed_sounds(
                     settings: PlaybackSettings {
                         mode: PlaybackMode::Despawn,
                         volume: Volume::new(5.0),
+                        speed: rand::random::<f32>() * 0.1 + 0.9,
                         ..default()
                     },
                 },

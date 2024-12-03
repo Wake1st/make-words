@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::{demo::letters::sounds::PlayWordSounds, AppSet};
+use crate::{
+    demo::{drawer::instructions::IterateInstruction, letters::sounds::PlayWordSounds},
+    AppSet,
+};
 
 use super::cursor::{store_cursor_position, CursorPosition};
 
@@ -33,6 +36,7 @@ fn start_drag(
     buttons: Res<ButtonInput<MouseButton>>,
     mut commands: Commands,
     mut play_word_sounds: EventWriter<PlayWordSounds>,
+    mut iterate_instruction: EventWriter<IterateInstruction>,
 ) {
     //  Only start on mouse down
     if buttons.just_pressed(MouseButton::Left) {
@@ -53,6 +57,9 @@ fn start_drag(
 
                 //  play the sounds of the word
                 play_word_sounds.send(PlayWordSounds { word: entity });
+
+                //  update instructions
+                iterate_instruction.send(IterateInstruction { index: 1 });
             }
         }
     }

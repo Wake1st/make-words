@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use crate::{
     demo::{
         dnd::{cursor::CursorPosition, drag::Draggable},
-        movement::ScreenWrap,
+        drawer::instructions::IterateInstruction,
     },
     screens::Screen,
     AppSet,
@@ -12,6 +12,7 @@ use crate::{
 use super::word::{RemoveLettersFromWord, Word};
 
 const LINK_SIZE: Vec2 = Vec2::new(32.0, 256.0);
+pub const LETTER_LINK_LAYER: f32 = 0.1;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_event::<RemoveLetterLink>();
@@ -42,7 +43,6 @@ pub fn spawn_letter_link(spawn: SpawnLink, commands: &mut Commands) -> Entity {
                 ..default()
             },
             LetterLink { size: LINK_SIZE },
-            ScreenWrap,
             StateScoped(Screen::Gameplay),
         ))
         .id()
@@ -54,6 +54,7 @@ fn break_word(
     links: Query<(&Transform, &LetterLink)>,
     cursor_position: Res<CursorPosition>,
     mut remove_letters_event: EventWriter<RemoveLettersFromWord>,
+    mut iterate_instruction: EventWriter<IterateInstruction>,
 ) {
     if buttons.just_pressed(MouseButton::Right) {
         //	check if cursor is hovered over a word
@@ -72,6 +73,9 @@ fn break_word(
                                 link_index: index,
                                 position: link_transform.translation.xy(),
                             });
+
+                            //  update instructions
+                            iterate_instruction.send(IterateInstruction { index: 3 });
                         }
                     }
                 }

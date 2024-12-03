@@ -1,13 +1,17 @@
 use bevy::prelude::*;
 
-use crate::screens::Screen;
+use crate::{screens::Screen, AppSet};
 
 use super::word::CreateNewWord;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_event::<SpawnLetter>();
+    app.add_event::<RemoveLetters>();
 
-    app.add_systems(Update, (spawn_letter,).chain());
+    app.add_systems(
+        Update,
+        (spawn_letter, remove_letters).in_set(AppSet::Update),
+    );
 }
 
 #[derive(Component, Default)]
@@ -44,8 +48,8 @@ fn spawn_letter(
     for event in spawn_event.read() {
         let texture: Handle<Image> =
             asset_server.load(format!("images/letters/{}", event.letter.asset_path));
-        let mut position = Transform::from_scale(Vec2::splat(2.0).extend(0.0));
-        position.translation += event.position.extend(0.0);
+        let mut transform = Transform::from_scale(Vec2::splat(2.0).extend(0.0));
+        transform.translation += event.position.extend(0.0);
 
         let letter_entity = commands
             .spawn((
@@ -53,7 +57,7 @@ fn spawn_letter(
                 event.letter.clone(),
                 SpriteBundle {
                     texture,
-                    transform: position,
+                    transform,
                     ..Default::default()
                 },
                 StateScoped(Screen::Gameplay),
@@ -65,5 +69,18 @@ fn spawn_letter(
             links: Vec::new(),
             position: event.position,
         });
+    }
+}
+
+#[derive(Event)]
+pub struct RemoveLetters {
+    pub letters: Vec<Entity>,
+}
+
+fn remove_letters(mut remove_event: EventReader<RemoveLetters>, mut commands: Commands) {
+    for event in remove_event.read() {
+        for &letter in event.letters.iter() {
+            commands.entity(letter).despawn_recursive();
+        }
     }
 }
