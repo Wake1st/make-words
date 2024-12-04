@@ -78,7 +78,7 @@ fn animate_cursor(
         for mut transform in &mut transform_query {
             transform.translation = (window_half_size
                 + Vec2::new(position.x + CURSOR_OFFSET.x, -position.y - CURSOR_OFFSET.y))
-            .extend(0.0);
+            .extend(10.0);
         }
     }
 }

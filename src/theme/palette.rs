@@ -11,3 +11,6 @@ pub const NODE_BACKGROUND: Color = Color::srgb(0.1, 0.62, 0.62);
 
 pub const DRAWER_BACKGROUND_COLOR: Color = Color::linear_rgba(0.2, 0.5, 0.6, 0.95);
 pub const DRAWER_BORDER_COLOR: Color = Color::linear_rgba(0.0, 0.3, 0.4, 0.95);
+
+pub const VOLUME_BACKGROUND_COLOR: Color = Color::srgb(0.3, 0.9, 0.3);
+pub const VOLUME_BUTTON_COLOR: Color = Color::srgb(0.2, 0.8, 0.8);

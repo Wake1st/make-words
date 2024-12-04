@@ -6,6 +6,7 @@ mod letters;
 pub mod level;
 mod movement;
 pub mod player;
+pub mod volume_control;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_plugins((
@@ -15,5 +16,6 @@ pub(super) fn plugin(app: &mut App) {
         dnd::plugin,
         letters::plugin,
         drawer::plugin,
+        volume_control::plugin,
     ));
 }
