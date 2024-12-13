@@ -49,11 +49,11 @@ fn add_to_word_check(
             let mut new_letters = Vec::new();
             for &entity in letter_entities.iter() {
                 if let Ok(letter) = letter_query.get(entity) {
-                    new_letters.push(letter.clone());
+                    new_letters.push(letter.value.clone());
                 }
             }
 
-            if allow_word(new_letters.clone()) {
+            if allow_word(new_letters) {
                 //  attach to dropped letter
                 add_letter_event.send(AddLettersToWord {
                     word: event.appending_word,

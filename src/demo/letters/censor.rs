@@ -1,40 +1,25 @@
-use super::letter::Letter;
-
-pub fn allow_word(letters: Vec<Letter>) -> bool {
-    let banned = vec![
-        "a", // 0
-        "c", // 1
-        "e", // 2
-        "f", // 3
-        "g", // 4
-        "i", // 5
-        "k", // 6
-        "n", // 7
-        "o", // 8
-        "r", // 9
-        "t", // 10
-        "u", // 11
-    ];
+pub fn allow_word(letters: Vec<String>) -> bool {
+    let banned = vec!["a", "c", "e", "f", "g", "i", "k", "n", "o", "r", "t", "u"];
 
     for (index, letter) in letters.iter().enumerate() {
         //	first check
-        if letter.value == banned[7] {
+        if letter == banned[7] {
             let mut flag_check = true;
 
             flag_check =
-                flag_check && (index + 1 < letters.len() && letters[index + 1].value == banned[5]);
+                flag_check && (index + 1 < letters.len() && letters[index + 1] == banned[5]);
 
             flag_check =
-                flag_check && (index + 2 < letters.len() && letters[index + 2].value == banned[4]);
+                flag_check && (index + 2 < letters.len() && letters[index + 2] == banned[4]);
 
             flag_check =
-                flag_check && (index + 3 < letters.len() && letters[index + 3].value == banned[4]);
+                flag_check && (index + 3 < letters.len() && letters[index + 3] == banned[4]);
 
             flag_check =
-                flag_check && (index + 4 < letters.len() && letters[index + 4].value == banned[2]);
+                flag_check && (index + 4 < letters.len() && letters[index + 4] == banned[2]);
 
             flag_check =
-                flag_check && (index + 5 < letters.len() && letters[index + 5].value == banned[9]);
+                flag_check && (index + 5 < letters.len() && letters[index + 5] == banned[9]);
 
             if flag_check {
                 return false;
@@ -42,23 +27,23 @@ pub fn allow_word(letters: Vec<Letter>) -> bool {
         }
 
         //	second check
-        if letter.value == banned[3] {
+        if letter == banned[3] {
             let mut flag_check = true;
 
             flag_check =
-                flag_check && (index + 1 < letters.len() && letters[index + 1].value == banned[0]);
+                flag_check && (index + 1 < letters.len() && letters[index + 1] == banned[0]);
 
             flag_check =
-                flag_check && (index + 2 < letters.len() && letters[index + 2].value == banned[4]);
+                flag_check && (index + 2 < letters.len() && letters[index + 2] == banned[4]);
 
             flag_check =
-                flag_check && (index + 3 < letters.len() && letters[index + 3].value == banned[4]);
+                flag_check && (index + 3 < letters.len() && letters[index + 3] == banned[4]);
 
             flag_check =
-                flag_check && (index + 4 < letters.len() && letters[index + 4].value == banned[8]);
+                flag_check && (index + 4 < letters.len() && letters[index + 4] == banned[8]);
 
             flag_check =
-                flag_check && (index + 5 < letters.len() && letters[index + 5].value == banned[10]);
+                flag_check && (index + 5 < letters.len() && letters[index + 5] == banned[10]);
 
             if flag_check {
                 return false;
@@ -66,17 +51,17 @@ pub fn allow_word(letters: Vec<Letter>) -> bool {
         }
 
         //	third check
-        if letter.value == banned[4] {
+        if letter == banned[4] {
             let mut flag_check = true;
 
             flag_check =
-                flag_check && (index + 1 < letters.len() && letters[index + 1].value == banned[8]);
+                flag_check && (index + 1 < letters.len() && letters[index + 1] == banned[8]);
 
             flag_check =
-                flag_check && (index + 2 < letters.len() && letters[index + 2].value == banned[8]);
+                flag_check && (index + 2 < letters.len() && letters[index + 2] == banned[8]);
 
             flag_check =
-                flag_check && (index + 3 < letters.len() && letters[index + 3].value == banned[6]);
+                flag_check && (index + 3 < letters.len() && letters[index + 3] == banned[6]);
 
             if flag_check {
                 return false;
@@ -84,17 +69,17 @@ pub fn allow_word(letters: Vec<Letter>) -> bool {
         }
 
         //	forth check
-        if letter.value == banned[1] {
+        if letter == banned[1] {
             let mut flag_check = true;
 
             flag_check =
-                flag_check && (index + 1 < letters.len() && letters[index + 1].value == banned[11]);
+                flag_check && (index + 1 < letters.len() && letters[index + 1] == banned[11]);
 
             flag_check =
-                flag_check && (index + 2 < letters.len() && letters[index + 2].value == banned[7]);
+                flag_check && (index + 2 < letters.len() && letters[index + 2] == banned[7]);
 
             flag_check =
-                flag_check && (index + 3 < letters.len() && letters[index + 3].value == banned[10]);
+                flag_check && (index + 3 < letters.len() && letters[index + 3] == banned[10]);
 
             if flag_check {
                 return false;
@@ -104,4 +89,50 @@ pub fn allow_word(letters: Vec<Letter>) -> bool {
 
     //	pass if nothing was flagged
     return true;
+}
+
+#[test]
+fn test_censor() {
+    let banned = vec!["a", "c", "e", "f", "g", "i", "k", "n", "o", "r", "t", "u"];
+
+    assert_eq!(
+        allow_word(vec![
+            banned[7].into(),
+            banned[5].into(),
+            banned[4].into(),
+            banned[4].into(),
+            banned[2].into(),
+            banned[9].into()
+        ]),
+        false
+    );
+    assert_eq!(
+        allow_word(vec![
+            banned[3].into(),
+            banned[0].into(),
+            banned[4].into(),
+            banned[4].into(),
+            banned[8].into(),
+            banned[10].into()
+        ]),
+        false
+    );
+    assert_eq!(
+        allow_word(vec![
+            banned[4].into(),
+            banned[8].into(),
+            banned[8].into(),
+            banned[6].into()
+        ]),
+        false
+    );
+    assert_eq!(
+        allow_word(vec![
+            banned[1].into(),
+            banned[11].into(),
+            banned[7].into(),
+            banned[10].into()
+        ]),
+        false
+    );
 }
