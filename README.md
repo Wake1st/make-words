@@ -23,4 +23,5 @@ This game was made using the [bevy new 2d template](https://github.com/TheBevyFl
   - [x] UI cleanup/styling
   - [x] user should be able to "remove" letters from the "play area"
   - [x] add incrementing instructions for new users to learn
-- [ ] remove the "cursor"
+- [x] remove the "cursor"
+- [x] add a censor for banning words
