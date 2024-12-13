@@ -1,5 +1,5 @@
 pub fn allow_word(letters: Vec<String>) -> bool {
-    let banned = vec!["a", "c", "e", "f", "g", "i", "k", "n", "o", "r", "t", "u"];
+    let banned = ["a", "c", "e", "f", "g", "i", "k", "n", "o", "r", "t", "u"];
 
     for (index, letter) in letters.iter().enumerate() {
         //	first check
@@ -88,51 +88,39 @@ pub fn allow_word(letters: Vec<String>) -> bool {
     }
 
     //	pass if nothing was flagged
-    return true;
+    true
 }
 
 #[test]
 fn test_censor() {
-    let banned = vec!["a", "c", "e", "f", "g", "i", "k", "n", "o", "r", "t", "u"];
+    let banned = ["a", "c", "e", "f", "g", "i", "k", "n", "o", "r", "t", "u"];
 
-    assert_eq!(
-        allow_word(vec![
-            banned[7].into(),
-            banned[5].into(),
-            banned[4].into(),
-            banned[4].into(),
-            banned[2].into(),
-            banned[9].into()
-        ]),
-        false
-    );
-    assert_eq!(
-        allow_word(vec![
-            banned[3].into(),
-            banned[0].into(),
-            banned[4].into(),
-            banned[4].into(),
-            banned[8].into(),
-            banned[10].into()
-        ]),
-        false
-    );
-    assert_eq!(
-        allow_word(vec![
-            banned[4].into(),
-            banned[8].into(),
-            banned[8].into(),
-            banned[6].into()
-        ]),
-        false
-    );
-    assert_eq!(
-        allow_word(vec![
-            banned[1].into(),
-            banned[11].into(),
-            banned[7].into(),
-            banned[10].into()
-        ]),
-        false
-    );
+    assert!(!allow_word(vec![
+        banned[7].into(),
+        banned[5].into(),
+        banned[4].into(),
+        banned[4].into(),
+        banned[2].into(),
+        banned[9].into()
+    ]));
+    assert!(!allow_word(vec![
+        banned[3].into(),
+        banned[0].into(),
+        banned[4].into(),
+        banned[4].into(),
+        banned[8].into(),
+        banned[10].into()
+    ]));
+    assert!(!allow_word(vec![
+        banned[4].into(),
+        banned[8].into(),
+        banned[8].into(),
+        banned[6].into()
+    ]));
+    assert!(!allow_word(vec![
+        banned[1].into(),
+        banned[11].into(),
+        banned[7].into(),
+        banned[10].into()
+    ]));
 }
