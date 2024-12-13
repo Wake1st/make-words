@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+pub mod censor;
 pub mod letter;
 mod letter_links;
 pub mod letter_loader;
@@ -17,5 +18,6 @@ pub(super) fn plugin(app: &mut App) {
         sounds::plugin,
         trash::plugin,
         window_size::plugin,
+        censor::plugin,
     ));
 }
