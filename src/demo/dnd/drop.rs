@@ -5,7 +5,8 @@ use crate::{
         drawer::instructions::IterateInstruction,
         letters::{
             trash::TrashCanDimentions,
-            word::{AddLettersToWord, RemoveWord, Word},
+            word::{RemoveWord, Word},
+            word_check::AddToWordCheck,
         },
     },
     AppSet,
@@ -31,10 +32,10 @@ fn drop(
     dragging: Query<(Entity, &Transform, &Word), With<Dragging>>,
     mut commands: Commands,
     drop_zones: Query<(Entity, &Transform, &Word)>,
-    mut add_letter_event: EventWriter<AddLettersToWord>,
     mut remove_word_event: EventWriter<RemoveWord>,
     trash_can: Res<TrashCanDimentions>,
     mut iterate_instruction: EventWriter<IterateInstruction>,
+    mut add_to_word_event: EventWriter<AddToWordCheck>,
 ) {
     //  Only end on mouse up
     if buttons.just_released(MouseButton::Left) {
@@ -57,22 +58,14 @@ fn drop(
                 let drop_zone_left = Rect::from_center_size(drop_zone_left_origin, DROP_ZONE_SIZE);
 
                 if drop_zone_left.contains(dragging_right_origin) {
-                    //  attach to dropped letter
-                    add_letter_event.send(AddLettersToWord {
-                        word: drop_zone_entity,
-                        letters: dragging_word.letters.clone(),
-                        links: dragging_word.links.clone(),
-                        left_side: true,
+                    //  check if the word is banned
+                    add_to_word_event.send(AddToWordCheck {
+                        appending_word: drop_zone_entity,
+                        removing_word: dragging_entity,
+                        adding_letters: dragging_word.letters.clone(),
+                        adding_links: dragging_word.links.clone(),
+                        adding_left: true,
                     });
-
-                    //  remove old word
-                    remove_word_event.send(RemoveWord {
-                        word: dragging_entity,
-                        remove_parts: false,
-                    });
-
-                    //  update instructions
-                    iterate_instruction.send(IterateInstruction { index: 2 });
 
                     //  exit to ensure this process happens ONCE
                     return;
@@ -86,22 +79,14 @@ fn drop(
                     Rect::from_center_size(drop_zone_right_origin, DROP_ZONE_SIZE);
 
                 if drop_zone_right.contains(dragging_left_origin) {
-                    //  attach to dropped letter
-                    add_letter_event.send(AddLettersToWord {
-                        word: drop_zone_entity,
-                        letters: dragging_word.letters.clone(),
-                        links: dragging_word.links.clone(),
-                        left_side: false,
+                    //  check if the word is banned
+                    add_to_word_event.send(AddToWordCheck {
+                        appending_word: drop_zone_entity,
+                        removing_word: dragging_entity,
+                        adding_letters: dragging_word.letters.clone(),
+                        adding_links: dragging_word.links.clone(),
+                        adding_left: false,
                     });
-
-                    //  remove old word
-                    remove_word_event.send(RemoveWord {
-                        word: dragging_entity,
-                        remove_parts: false,
-                    });
-
-                    //  update instructions
-                    iterate_instruction.send(IterateInstruction { index: 2 });
 
                     //  exit to ensure this process happens ONCE
                     return;
