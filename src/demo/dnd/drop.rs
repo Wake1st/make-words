@@ -4,9 +4,9 @@ use crate::{
     demo::{
         drawer::instructions::IterateInstruction,
         letters::{
-            censor::AddToWordCheck,
             trash::TrashCanDimentions,
             word::{RemoveWord, Word},
+            word_check::AddToWordCheck,
         },
     },
     AppSet,

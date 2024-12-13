@@ -198,12 +198,6 @@ fn remove_letters_from_word(
             } else {
                 let mut split = word.links.split_off(event.link_index);
                 let new_links = split.split_off(if split.len() == 1 { 0 } else { 1 });
-                info!(
-                    "split len(): {:?}\tword links len(): {:?}\tnew link len(): {:?}",
-                    split.len(),
-                    new_links.len(),
-                    word.links.len(),
-                );
 
                 remove_link_event.send(RemoveLetterLink { link: split[0] });
 

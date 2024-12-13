@@ -1,10 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
-    demo::{
-        dnd::{cursor::CursorPosition, drag::Draggable},
-        drawer::instructions::IterateInstruction,
-    },
+    demo::dnd::{cursor::CursorPosition, drag::Draggable},
     screens::Screen,
     AppSet,
 };
@@ -53,8 +50,7 @@ fn break_word(
     words: Query<(Entity, &Transform, &Draggable, &Word)>,
     links: Query<(&Transform, &LetterLink)>,
     cursor_position: Res<CursorPosition>,
-    mut remove_letters_event: EventWriter<RemoveLettersFromWord>,
-    mut iterate_instruction: EventWriter<IterateInstruction>,
+    mut remove_from_word: EventWriter<RemoveLettersFromWord>,
 ) {
     if buttons.just_pressed(MouseButton::Right) {
         //	check if cursor is hovered over a word
@@ -67,15 +63,12 @@ fn break_word(
                         let link_rect =
                             Rect::from_center_size(link_transform.translation.xy(), link.size);
                         if link_rect.contains(cursor_position.0) {
-                            //  remove the letters from the right side
-                            remove_letters_event.send(RemoveLettersFromWord {
+                            //  check the new word before allowing separation
+                            remove_from_word.send(RemoveLettersFromWord {
                                 word: word_entity,
                                 link_index: index,
                                 position: link_transform.translation.xy(),
                             });
-
-                            //  update instructions
-                            iterate_instruction.send(IterateInstruction { index: 3 });
                         }
                     }
                 }
